@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#E7E3D7">
+<meta name="theme-color" content="#DED9C8">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" href="./icon-192.png">
@@ -14,9 +14,10 @@
 <title>Reisepass — Länder-Dex</title>
 <style>
 :root{
-  --paper:#E7E3D7; --paper2:#F3F0E7; --paper3:#FBF9F3;
+  --paper:#DED9C8; --paper2:#F1EDE2; --paper3:#FAF7EE;
   --ink:#16323F; --ink-soft:#63737A; --line:#C6BEAB;
-  --stamp:#6E3B8E; --stamp-red:#A02C3C; --gold:#94762A; --green:#2E5D4E;
+  --stamp:#6E3B8E; --stamp-red:#A02C3C; --stamp-teal:#1F6660; --stamp-blue:#2A4C86;
+  --gold:#94762A;
   --display: Copperplate, "Copperplate Gothic Light", "Palatino Linotype", Palatino, "Book Antiqua", serif;
   --body: "Avenir Next", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
@@ -26,126 +27,93 @@ html,body{margin:0;padding:0}
 body{
   font-family:var(--body); color:var(--ink); background-color:var(--paper);
   background-image:
-    repeating-linear-gradient(62deg, rgba(46,93,78,.055) 0 1px, transparent 1px 8px),
-    repeating-linear-gradient(-62deg, rgba(110,59,142,.05) 0 1px, transparent 1px 10px),
-    radial-gradient(circle at 50% -15%, rgba(255,255,255,.75), rgba(255,255,255,0) 65%);
-  -webkit-text-size-adjust:100%;
-  padding:12px 12px 60px; line-height:1.45;
+    repeating-radial-gradient(circle at 18% 12%, transparent 0 15px, rgba(46,93,78,.07) 15px 16px, transparent 16px 31px),
+    repeating-radial-gradient(circle at 84% 62%, transparent 0 19px, rgba(110,59,142,.055) 19px 20px, transparent 20px 39px),
+    repeating-radial-gradient(circle at 46% 108%, transparent 0 23px, rgba(160,44,60,.045) 23px 24px, transparent 24px 47px),
+    repeating-linear-gradient(74deg, rgba(22,50,63,.05) 0 .5px, transparent .5px 6px),
+    repeating-linear-gradient(-74deg, rgba(22,50,63,.04) 0 .5px, transparent .5px 8px);
+  background-attachment:fixed;
+  -webkit-text-size-adjust:100%; padding:12px 12px 60px; line-height:1.45;
 }
 .wrap{max-width:940px;margin:0 auto}
 button{font-family:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 
-/* ---------- Passport header ---------- */
-.pass{
-  background:var(--paper2); border:1px solid var(--line); border-radius:3px;
-  box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 6px 18px -12px rgba(22,50,63,.6);
-  overflow:hidden; position:relative;
-}
-.pass::before{
-  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
-  background:
-    repeating-radial-gradient(circle at 100% 0, transparent 0 12px, rgba(46,93,78,.09) 12px 13px, transparent 13px 26px);
-}
+.pass{background:var(--paper2);border:1px solid var(--line);border-radius:3px;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 6px 18px -12px rgba(22,50,63,.6);overflow:hidden;position:relative}
+.pass::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background:repeating-radial-gradient(circle at 100% 0, transparent 0 12px, rgba(46,93,78,.1) 12px 13px, transparent 13px 26px)}
 .pass-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 14px 6px;position:relative}
 .pass-title{font-family:var(--display);letter-spacing:.19em;font-size:14px;text-transform:uppercase;line-height:1.25}
 .pass-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ink-soft);text-transform:uppercase;margin-top:3px}
-.crest{font-size:22px;opacity:.75;filter:grayscale(.3)}
-.pass-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:6px 14px 12px;position:relative}
+.crest{font-size:22px;opacity:.75}
+.pass-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px;padding:6px 14px 12px;position:relative;align-items:end}
+.pass-photo{width:52px;height:66px;border:1px solid var(--line);background:var(--paper3);border-radius:2px;
+  overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ink-soft);padding:0}
+.pass-photo img{width:100%;height:100%;object-fit:cover}
+.idrow{display:flex;gap:11px;align-items:flex-end;padding:0 14px 4px}
 .fld{min-width:0}
 .fld .lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;color:var(--ink-soft);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fld .vl{font-family:var(--display);font-size:19px;letter-spacing:.04em;line-height:1.15}
 .fld .vl small{font-size:11px;color:var(--ink-soft);letter-spacing:.08em}
-#nameIn{
-  width:100%;background:transparent;border:0;border-bottom:1px dashed var(--line);
-  font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;padding:1px 0;
-}
+.fld .flair{font-family:var(--display);font-size:12.5px;letter-spacing:.08em;color:var(--stamp)}
+#nameIn{width:100%;background:transparent;border:0;border-bottom:1px dashed var(--line);
+  font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;padding:1px 0}
 #nameIn:focus{outline:none;border-bottom-color:var(--stamp)}
-.mrz{
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;line-height:1.7;
-  background:rgba(255,255,255,.6);border-top:1px dashed var(--line);
-  padding:8px 14px;white-space:nowrap;overflow-x:auto;overscroll-behavior-x:contain;color:var(--ink)
-}
-.mrz div{opacity:.88}
+.mrz{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;line-height:1.7;background:rgba(255,255,255,.6);
+  border-top:1px dashed var(--line);padding:8px 14px;white-space:nowrap;overflow-x:auto;overscroll-behavior-x:contain}
 .xpbar{height:4px;background:rgba(22,50,63,.1)}
 .xpbar i{display:block;height:100%;background:var(--stamp);transition:width .5s ease}
 
-/* ---------- Tabs ---------- */
 .tabs{display:flex;gap:2px;margin:14px 0 10px;overflow-x:auto;border-bottom:1px solid var(--line)}
-.tabs button{
-  background:transparent;border:0;padding:9px 12px;font-family:var(--display);
-  font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);
-  border-bottom:2px solid transparent;white-space:nowrap
-}
+.tabs button{background:transparent;border:0;padding:9px 11px;font-family:var(--display);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-bottom:2px solid transparent;white-space:nowrap}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
 
-/* ---------- Filters ---------- */
-.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center}
-#search{
-  flex:1 1 150px;min-width:130px;background:var(--paper3);border:1px solid var(--line);
-  border-radius:2px;padding:8px 10px;font-size:14px
-}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
+#search{flex:1 1 150px;min-width:130px;background:var(--paper3);border:1px solid var(--line);border-radius:2px;padding:8px 10px;font-size:14px}
 #search:focus{outline:2px solid var(--stamp);outline-offset:1px}
-.chip{
-  background:transparent;border:1px solid var(--line);border-radius:20px;padding:5px 10px;
-  font-size:11.5px;letter-spacing:.06em;color:var(--ink-soft)
-}
+.chip{background:transparent;border:1px solid var(--line);border-radius:20px;padding:5px 10px;font-size:11.5px;letter-spacing:.06em;color:var(--ink-soft)}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper2)}
 
-/* ---------- Country grid ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:8px}
-.card{
-  position:relative;text-align:left;background:var(--paper3);border:1px solid var(--line);
-  border-radius:2px;padding:10px 10px 9px;min-height:82px;overflow:hidden;
-  display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s ease
-}
+.card{position:relative;text-align:left;background:var(--paper3);border:1px solid var(--line);border-radius:2px;
+  padding:10px 10px 9px;min-height:82px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s ease}
 .card:active{transform:scale(.985)}
 .card.un{background:transparent;border-style:dashed;opacity:.62}
 .card .flag{font-size:19px;line-height:1}
 .card .nm{font-family:var(--display);font-size:13px;letter-spacing:.05em;margin-top:5px;padding-right:34px}
 .card .meta{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;margin-top:4px}
 .tier3 .nm{color:var(--gold)}
-.card .mini{
-  position:absolute;right:-6px;top:6px;transform:rotate(-13deg);
-  border:1.5px solid var(--stamp);border-radius:3px;color:var(--stamp);
-  font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:2px 5px;opacity:.85;
-  filter:url(#inkfx)
-}
+.card .mini{position:absolute;right:-6px;top:6px;transform:rotate(-13deg);border:1.5px solid var(--stamp);border-radius:3px;
+  color:var(--stamp);font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:2px 5px;opacity:.85;filter:url(#inkfx)}
 .card .mini b{display:block;font-size:11px;letter-spacing:.12em;text-align:center}
 @keyframes slam{0%{transform:rotate(-13deg) scale(2.6);opacity:0}60%{opacity:1}100%{transform:rotate(-13deg) scale(1);opacity:.85}}
 .stamped .mini{animation:slam .32s cubic-bezier(.2,1.5,.4,1) both}
 
-/* ---------- Detail page ---------- */
 .sheet{position:fixed;inset:0;background:rgba(22,50,63,.6);z-index:40;overflow-y:auto;padding:10px}
-.page{
-  max-width:640px;margin:0 auto 30px;background:var(--paper2);
-  border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden
-}
-.page::before{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
-  background:repeating-radial-gradient(circle at 0 100%, transparent 0 14px, rgba(110,59,142,.09) 14px 15px, transparent 15px 30px)
-}
+.page{max-width:640px;margin:0 auto 30px;background:var(--paper2);border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden}
+.page::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background:repeating-radial-gradient(circle at 0 100%, transparent 0 14px, rgba(110,59,142,.09) 14px 15px, transparent 15px 30px)}
 .page-hd{display:flex;gap:10px;align-items:flex-start;padding:14px 14px 8px;border-bottom:1px dashed var(--line);position:relative}
 .page-hd .flag{font-size:32px;line-height:1}
-.page-hd h2{font-family:var(--display);font-size:20px;letter-spacing:.06em;margin:2px 0 2px;font-weight:400}
+.page-hd h2{font-family:var(--display);font-size:20px;letter-spacing:.06em;margin:2px 0;font-weight:400;padding-right:30px}
 .page-hd .meta{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--ink-soft);text-transform:uppercase}
 .close{position:absolute;right:8px;top:8px;background:transparent;border:0;font-size:22px;line-height:1;padding:4px 8px;color:var(--ink-soft)}
 .sec{padding:12px 14px;border-bottom:1px dashed var(--line);position:relative}
 .sec h3{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 9px;font-weight:400}
-.visit-row{display:flex;align-items:center;gap:10px}
-.bigbtn{
-  flex:1;background:var(--ink);color:var(--paper2);border:0;border-radius:2px;padding:11px;
-  font-family:var(--display);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase
-}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:7px 12px}
+.facts div{min-width:0}
+.facts .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.facts .v{font-size:13.5px}
+.bigbtn{width:100%;background:var(--ink);color:var(--paper2);border:0;border-radius:2px;padding:11px;
+  font-family:var(--display);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase}
 .bigbtn.on{background:transparent;color:var(--ink-soft);border:1px dashed var(--line)}
 .hint{font-size:11.5px;color:var(--ink-soft);margin-top:7px;line-height:1.4}
 .frm{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .frm label{display:block}
 .frm .lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;color:var(--ink-soft);text-transform:uppercase;display:block;margin-bottom:2px}
-.frm input,.frm select,.frm textarea{
-  width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);
-  padding:4px 0;font-size:14px;border-radius:0
-}
+.frm input,.frm select,.frm textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:4px 0;font-size:14px;border-radius:0}
 .frm input:focus,.frm select:focus,.frm textarea:focus{outline:none;border-bottom:1px solid var(--stamp)}
 .frm .wide{grid-column:1/-1}
 .frm textarea{resize:vertical;min-height:48px;border:1px solid var(--line);padding:6px;background:var(--paper3)}
@@ -153,31 +121,23 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .stars button{background:none;border:0;font-size:19px;padding:0 1px;filter:grayscale(1);opacity:.35}
 .stars button.on{filter:none;opacity:1}
 .hl{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px dotted rgba(198,190,171,.7)}
-.hl:last-child{border-bottom:0}
-.hl .box{
-  flex:0 0 auto;width:19px;height:19px;border:1.5px solid var(--line);border-radius:2px;
-  background:transparent;font-size:12px;line-height:1;color:var(--stamp);display:flex;align-items:center;justify-content:center;margin-top:1px
-}
+.hl:last-of-type{border-bottom:0}
+.hl .box{flex:0 0 auto;width:19px;height:19px;border:1.5px solid var(--line);border-radius:2px;background:transparent;
+  font-size:12px;line-height:1;color:var(--stamp);display:flex;align-items:center;justify-content:center;margin-top:1px}
 .hl .box.on{border-color:var(--stamp);filter:url(#inkfx)}
 .hl .tx{font-size:14px;flex:1}
-.hl.done .tx{color:var(--ink)}
 .hl:not(.done) .tx{color:var(--ink-soft)}
 .hl .del{background:none;border:0;color:var(--ink-soft);font-size:14px;padding:0 2px;opacity:.6}
 .addhl{display:flex;gap:6px;margin-top:9px}
 .addhl input{flex:1;background:var(--paper3);border:1px solid var(--line);padding:7px;font-size:13.5px;border-radius:2px}
-.addhl button,.smallbtn{
-  background:transparent;border:1px solid var(--line);border-radius:2px;padding:7px 11px;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)
-}
+.addhl button,.smallbtn{background:transparent;border:1px solid var(--line);border-radius:2px;padding:7px 11px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
 .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.slot{
-  position:relative;aspect-ratio:1/1;border:1px dashed var(--line);border-radius:2px;background:var(--paper3);
-  display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:11px;overflow:hidden;padding:0
-}
+.slot{position:relative;aspect-ratio:1/1;border:1px dashed var(--line);border-radius:2px;background:var(--paper3);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:11px;overflow:hidden;padding:0}
 .slot img{width:100%;height:100%;object-fit:cover;display:block}
 .slot .rm{position:absolute;right:3px;top:3px;background:rgba(243,240,231,.9);border:1px solid var(--line);border-radius:2px;font-size:11px;line-height:1;padding:2px 5px}
 
-/* ---------- Achievements ---------- */
 .ach{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:2px;background:var(--paper3);margin-bottom:7px}
 .ach.locked{border-style:dashed;background:transparent;opacity:.55}
 .ach .ic{font-size:20px;line-height:1;filter:grayscale(1)}
@@ -186,18 +146,17 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .ach .d{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .ach .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink-soft);margin-top:4px}
 
-/* ---------- Stamp book ---------- */
-.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}
-.bigstamp{
-  position:relative;aspect-ratio:1/1;border:2px solid var(--stamp);border-radius:4px;color:var(--stamp);
-  background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;padding:6px;filter:url(#inkfx);opacity:.86
-}
-.bigstamp.alt{border-color:var(--stamp-red);color:var(--stamp-red)}
-.bigstamp .cc{font-family:var(--mono);font-size:20px;letter-spacing:.16em;font-weight:700}
-.bigstamp .nn{font-family:var(--display);font-size:9.5px;letter-spacing:.07em;text-align:center;line-height:1.15}
-.bigstamp .dd{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;opacity:.85}
-.bigstamp::after{content:"";position:absolute;inset:3px;border:1px solid currentColor;border-radius:2px;opacity:.5}
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.bigstamp{position:relative;aspect-ratio:1/1;border:2.5px solid var(--c);color:var(--c);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:8px;filter:url(#inkfx);opacity:.88}
+.bigstamp::after{content:"";position:absolute;inset:4px;border:1px solid currentColor;opacity:.55}
+.s-round,.s-round::after{border-radius:50%}
+.s-oval{border-radius:50%/38%} .s-oval::after{border-radius:50%/38%}
+.s-rect{border-radius:3px} .s-rect::after{border-radius:2px}
+.bigstamp .mot{font-size:20px;line-height:1;filter:grayscale(1);opacity:.6;margin-bottom:1px}
+.bigstamp .cc{font-family:var(--mono);font-size:15px;letter-spacing:.16em;font-weight:700}
+.bigstamp .nn{font-family:var(--display);font-size:8.5px;letter-spacing:.06em;text-align:center;line-height:1.1;padding:0 2px}
+.bigstamp .dd{font-family:var(--mono);font-size:8px;letter-spacing:.06em;opacity:.85}
 .empty{font-size:13.5px;color:var(--ink-soft);padding:16px;border:1px dashed var(--line);border-radius:2px;text-align:center}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-bottom:14px}
 .stat{background:var(--paper3);border:1px solid var(--line);border-radius:2px;padding:9px 10px}
@@ -207,18 +166,25 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .rowbtns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
 .danger{border-color:var(--stamp-red);color:var(--stamp-red)}
 .warn{background:#F7E9C9;border:1px solid var(--gold);padding:9px 11px;border-radius:2px;font-size:12.5px;margin-bottom:12px}
-.toast{
-  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--paper2);
-  padding:9px 15px;border-radius:2px;font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s
-}
+.panel{background:var(--paper3);border:1px solid var(--line);border-radius:2px;padding:12px 13px;margin-bottom:10px}
+.panel h3{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 9px;font-weight:400}
+.xprow{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:4px 0;border-bottom:1px dotted rgba(198,190,171,.8)}
+.xprow:last-child{border-bottom:0}
+.xprow b{font-family:var(--mono);font-size:12.5px;font-weight:400}
+.xprow.sum{border-top:1px solid var(--line);margin-top:5px;padding-top:7px;border-bottom:0}
+.flairs{display:flex;flex-wrap:wrap;gap:6px}
+.flairs button{background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 11px;
+  font-family:var(--display);font-size:12px;letter-spacing:.06em;color:var(--ink-soft)}
+.flairs button.on{border-color:var(--stamp);color:var(--stamp)}
+.flairs button.lock{opacity:.4;border-style:dashed}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.modes button{background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 10px;font-size:12.5px;color:var(--ink-soft)}
+.modes button.on{border-color:var(--ink);background:var(--ink);color:var(--paper2)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--paper2);
+  padding:9px 15px;border-radius:2px;font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
-@media (max-width:420px){
-  .pass-grid{grid-template-columns:repeat(2,1fr)}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
-}
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-}
+@media (max-width:420px){.grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}.facts{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
 </style>
 </head>
@@ -226,22 +192,23 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="inkfx"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.1" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 
 <div class="wrap">
+  <div id="guestBar"></div>
   <header class="pass">
     <div class="pass-head">
-      <div>
-        <div class="pass-title">Reisepass</div>
-        <div class="pass-sub">Persönliches Länderverzeichnis</div>
-      </div>
+      <div><div class="pass-title">Reisepass</div><div class="pass-sub">Persönliches Länderverzeichnis</div></div>
       <div class="crest">🛂</div>
     </div>
-    <div class="pass-grid">
-      <div class="fld" style="grid-column:span 2">
-        <span class="lb">Name / Surname</span>
-        <input id="nameIn" placeholder="DEIN NAME" autocomplete="off" spellcheck="false">
+    <div class="idrow">
+      <button class="pass-photo" id="passPhoto" title="Passfoto">Foto</button>
+      <div class="pass-grid" style="flex:1;padding:0">
+        <div class="fld"><span class="lb">Name / Surname</span>
+          <input id="nameIn" placeholder="DEIN NAME" autocomplete="off" spellcheck="false">
+          <div class="flair" id="flairOut"></div></div>
+        <div class="fld"><span class="lb">Stufe</span><div class="vl" id="lvlOut">1</div></div>
+        <div class="fld"><span class="lb">Länder</span><div class="vl" id="cntOut">0<small>/0</small></div></div>
       </div>
-      <div class="fld"><span class="lb">Stufe</span><div class="vl" id="lvlOut">1</div></div>
-      <div class="fld"><span class="lb">Länder</span><div class="vl" id="cntOut">0<small>/0</small></div></div>
     </div>
+    <div style="height:8px"></div>
     <div class="xpbar"><i id="xpFill" style="width:0%"></i></div>
     <div class="mrz"><div id="mrz1"></div><div id="mrz2"></div></div>
   </header>
@@ -250,6 +217,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
     <button role="tab" data-tab="dex" aria-selected="true">Dex</button>
     <button role="tab" data-tab="book" aria-selected="false">Stempelbuch</button>
     <button role="tab" data-tab="ach" aria-selected="false">Orden</button>
+    <button role="tab" data-tab="prof" aria-selected="false">Profil</button>
     <button role="tab" data-tab="data" aria-selected="false">Daten</button>
   </nav>
 
@@ -265,17 +233,18 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
       <div class="grid" id="grid"></div>
       <div class="rowbtns"><button class="smallbtn" id="addCountry">+ Eigenes Land</button></div>
     </section>
-
-    <section id="tab-book" hidden>
-      <div class="stats" id="bookStats"></div>
-      <div class="book" id="book"></div>
-    </section>
-
+    <section id="tab-book" hidden><div class="stats" id="bookStats"></div><div class="book" id="book"></div></section>
     <section id="tab-ach" hidden><div id="achList"></div></section>
-
+    <section id="tab-prof" hidden><div id="profBody"></div></section>
     <section id="tab-data" hidden>
       <div id="storeWarn"></div>
-      <p class="note">Alles bleibt lokal in diesem Browser. Lade die Datei herunter und öffne sie immer vom selben Gerät und Ort aus, dann findest du deine Einträge wieder. Für Umzüge und Backups: exportieren.</p>
+      <div class="panel">
+        <h3>Pass teilen</h3>
+        <p class="note">Erzeugt einen Link mit deinen Stempeln, Orden und deiner Stufe. Wer ihn öffnet, sieht deinen Pass nur zum Anschauen. Notizen, Städte, Essen und Fotos bleiben draußen.</p>
+        <div class="rowbtns" style="margin-bottom:6px"><button class="smallbtn" id="shareBtn">Link erzeugen</button></div>
+        <input id="shareOut" readonly hidden style="width:100%;background:var(--paper2);border:1px solid var(--line);border-radius:2px;padding:8px;font-family:var(--mono);font-size:11px">
+      </div>
+      <p class="note">Alles bleibt lokal auf diesem Gerät. Für Backups und Gerätewechsel: exportieren.</p>
       <div class="rowbtns">
         <button class="smallbtn" id="expBtn">Daten exportieren</button>
         <button class="smallbtn" id="impBtn">Daten importieren</button>
@@ -290,213 +259,372 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 <div id="sheetHost"></div>
 <script>
 /* ====== LÄNDERDATEN ======
-   c=Code n=Name f=Flagge k=Kontinent t=Seltenheit(1-3)
-   i=Inselstaat s=Südhalbkugel p=Polarkreis h=Ziele im Land */
+ c Code · n Name · f Flagge · k Kontinent · t Seltenheit · pop Einwohner (Mio, gerundet)
+ cap Hauptstadt · lg Amtssprachen · m Stempelmotiv · i Inselstaat · s Südhalbkugel · arc Polarkreis · h Ziele */
 const BASE=[
-{c:"DE",n:"Deutschland",f:"🇩🇪",k:"Europa",t:1,h:["Zugspitze","Kölner Dom","Ostseeküste","Nationalpark Bayerischer Wald"]},
-{c:"AT",n:"Österreich",f:"🇦🇹",k:"Europa",t:1,h:["Großglockner-Hochalpenstraße","Hallstatt","Wiener Kaffeehaus","Skitag in den Alpen"]},
-{c:"CH",n:"Schweiz",f:"🇨🇭",k:"Europa",t:1,h:["Matterhorn gesehen","Glacier Express","Jungfraujoch","Bad im Bergsee"]},
-{c:"FR",n:"Frankreich",f:"🇫🇷",k:"Europa",t:1,h:["Eiffelturm","Mont-Saint-Michel","Calanques","Loire-Schloss"]},
-{c:"IT",n:"Italien",f:"🇮🇹",k:"Europa",t:1,h:["Kolosseum","Dolomiten","Cinque Terre","Pompeji & Vesuv"]},
-{c:"ES",n:"Spanien",f:"🇪🇸",k:"Europa",t:1,h:["Sagrada Família","Alhambra","Jakobsweg-Etappe","Picos de Europa"]},
-{c:"PT",n:"Portugal",f:"🇵🇹",k:"Europa",t:1,h:["Sintra","Douro-Tal","Algarve-Klippen","Fado-Abend"]},
-{c:"NL",n:"Niederlande",f:"🇳🇱",k:"Europa",t:1,h:["Grachtenfahrt","Mühlen von Kinderdijk","Wattenmeer-Insel","Tagestour mit dem Rad"]},
-{c:"BE",n:"Belgien",f:"🇧🇪",k:"Europa",t:1,h:["Grote Markt Brüssel","Brügger Kanäle","Trappistenbier an der Quelle","Fritten mit Sauce"]},
-{c:"LU",n:"Luxemburg",f:"🇱🇺",k:"Europa",t:2,h:["Kasematten","Müllerthal-Trail","Felsenaltstadt","Moseltal"]},
-{c:"GB",n:"Vereinigtes Königreich",f:"🇬🇧",k:"Europa",t:1,i:1,h:["Tower Bridge","Stonehenge","Scottish Highlands","Lake District"]},
-{c:"IE",n:"Irland",f:"🇮🇪",k:"Europa",t:1,i:1,h:["Cliffs of Moher","Ring of Kerry","Pub mit Livemusik","Connemara"]},
-{c:"DK",n:"Dänemark",f:"🇩🇰",k:"Europa",t:1,h:["Nyhavn","Louisiana Museum","Skagen & Grenen","Smørrebrød"]},
-{c:"SE",n:"Schweden",f:"🇸🇪",k:"Europa",t:1,p:1,h:["Gamla Stan","Schärengarten","Abisko & Nordlicht","Elch gesehen"]},
-{c:"NO",n:"Norwegen",f:"🇳🇴",k:"Europa",t:2,p:1,h:["Geirangerfjord","Preikestolen","Lofoten","Mitternachtssonne"]},
-{c:"FI",n:"Finnland",f:"🇫🇮",k:"Europa",t:2,p:1,h:["Nordlichter","Seenplatte Saimaa","Rauchsauna","Lappland im Winter"]},
-{c:"IS",n:"Island",f:"🇮🇸",k:"Europa",t:2,i:1,h:["Golden Circle","Jökulsárlón","Papageitaucher","Bad in heißer Quelle"]},
-{c:"PL",n:"Polen",f:"🇵🇱",k:"Europa",t:1,h:["Krakauer Altstadt","Salzbergwerk Wieliczka","Masuren","Białowieża-Urwald"]},
-{c:"CZ",n:"Tschechien",f:"🇨🇿",k:"Europa",t:1,h:["Karlsbrücke","Böhmische Schweiz","Český Krumlov","Brauerei in Pilsen"]},
-{c:"SK",n:"Slowakei",f:"🇸🇰",k:"Europa",t:2,h:["Hohe Tatra","Burg Bratislava","Slowakisches Paradies","Eishöhle"]},
-{c:"HU",n:"Ungarn",f:"🇭🇺",k:"Europa",t:1,h:["Széchenyi-Bad","Parlament Budapest","Plattensee","Ruinenkneipe"]},
-{c:"SI",n:"Slowenien",f:"🇸🇮",k:"Europa",t:2,h:["Bleder See","Triglav-Nationalpark","Höhlen von Škocjan","Soča-Tal"]},
-{c:"HR",n:"Kroatien",f:"🇭🇷",k:"Europa",t:1,h:["Plitvicer Seen","Stadtmauer Dubrovnik","Kornaten","Krka-Wasserfälle"]},
-{c:"BA",n:"Bosnien-Herzegowina",f:"🇧🇦",k:"Europa",t:2,h:["Stari Most in Mostar","Baščaršija Sarajevo","Kravica-Wasserfälle","Sutjeska-Urwald"]},
-{c:"RS",n:"Serbien",f:"🇷🇸",k:"Europa",t:2,h:["Belgrader Festung","Novi Sad","Đavolja Varoš","Tara-Nationalpark"]},
-{c:"ME",n:"Montenegro",f:"🇲🇪",k:"Europa",t:2,h:["Bucht von Kotor","Durmitor & Žabljak","Skadarsee","Kloster Ostrog"]},
-{c:"XK",n:"Kosovo",f:"🇽🇰",k:"Europa",t:3,h:["Prizren","Rugova-Schlucht","Kloster Dečani","Bergpanorama bei Peja"]},
-{c:"AL",n:"Albanien",f:"🇦🇱",k:"Europa",t:2,h:["Ksamil","Burg von Gjirokastra","Butrint","Theth & Valbona"]},
-{c:"MK",n:"Nordmazedonien",f:"🇲🇰",k:"Europa",t:2,h:["Ohridsee","Alter Basar Skopje","Mavrovo","Kloster Sveti Naum"]},
-{c:"GR",n:"Griechenland",f:"🇬🇷",k:"Europa",t:1,h:["Akropolis","Meteora-Klöster","Inselhopping","Samaria-Schlucht"]},
-{c:"BG",n:"Bulgarien",f:"🇧🇬",k:"Europa",t:2,h:["Rila-Kloster","Altstadt Plovdiv","Sieben Rila-Seen","Schwarzmeerküste"]},
-{c:"RO",n:"Rumänien",f:"🇷🇴",k:"Europa",t:2,h:["Transfăgărășan","Schloss Bran","Donaudelta","Bären in den Karpaten"]},
-{c:"MD",n:"Moldau",f:"🇲🇩",k:"Europa",t:3,h:["Weinkeller Cricova","Orheiul Vechi","Chișinău","Abstecher Transnistrien"]},
-{c:"UA",n:"Ukraine",f:"🇺🇦",k:"Europa",t:3,h:["Lwiw-Altstadt","Höhlenkloster Kyjiw","Karpaten","Schwarzmeerküste"]},
-{c:"BY",n:"Belarus",f:"🇧🇾",k:"Europa",t:3,h:["Belowescher Heide","Schloss Mir","Minsker Prospekt","Brester Festung"]},
-{c:"RU",n:"Russland",f:"🇷🇺",k:"Europa",t:3,p:1,h:["Roter Platz","Eremitage","Transsib gefahren","Baikalsee"]},
-{c:"EE",n:"Estland",f:"🇪🇪",k:"Europa",t:2,h:["Tallinner Altstadt","Lahemaa-Nationalpark","Moorwanderung","Sauna"]},
-{c:"LV",n:"Lettland",f:"🇱🇻",k:"Europa",t:2,h:["Jugendstil in Riga","Gauja-Nationalpark","Jūrmala","Zentralmarkt"]},
-{c:"LT",n:"Litauen",f:"🇱🇹",k:"Europa",t:2,h:["Kurische Nehrung","Vilniuser Altstadt","Berg der Kreuze","Trakai"]},
-{c:"TR",n:"Türkei",f:"🇹🇷",k:"Europa",t:1,h:["Hagia Sophia","Ballonfahrt Kappadokien","Pamukkale","Lykischer Weg"]},
-{c:"CY",n:"Zypern",f:"🇨🇾",k:"Europa",t:2,i:1,h:["Troodos-Gebirge","Aphrodite-Felsen","Grüne Linie Nikosia","Akamas-Halbinsel"]},
-{c:"MT",n:"Malta",f:"🇲🇹",k:"Europa",t:2,i:1,h:["Valletta","Blaue Grotte","Megalithtempel","Blue Lagoon auf Comino"]},
-{c:"AD",n:"Andorra",f:"🇦🇩",k:"Europa",t:3,h:["Grandvalira","Caldea-Therme","Coma Pedrosa","Bergpass gefahren"]},
-{c:"MC",n:"Monaco",f:"🇲🇨",k:"Europa",t:3,h:["Formel-1-Kurs abgelaufen","Ozeanografisches Museum","Casino Monte-Carlo","Port Hercule"]},
-{c:"SM",n:"San Marino",f:"🇸🇲",k:"Europa",t:3,h:["Die drei Türme","Monte Titano","Altstadtgassen","Passstempel geholt"]},
-{c:"VA",n:"Vatikanstadt",f:"🇻🇦",k:"Europa",t:3,h:["Petersdom","Sixtinische Kapelle","Vatikanische Museen","Kuppelaufstieg"]},
-{c:"LI",n:"Liechtenstein",f:"🇱🇮",k:"Europa",t:3,h:["Schloss Vaduz","Fürstensteig","Malbun","Briefmarkenmuseum"]},
+{c:"DE",n:"Deutschland",f:"🇩🇪",k:"Europa",t:1,pop:84,cap:"Berlin",lg:["de"],m:"🍺",h:["Zugspitze","Kölner Dom","Ostseeküste","Nationalpark Bayerischer Wald"]},
+{c:"AT",n:"Österreich",f:"🇦🇹",k:"Europa",t:1,pop:9.1,cap:"Wien",lg:["de"],m:"⛷️",h:["Großglockner-Hochalpenstraße","Hallstatt","Wiener Kaffeehaus","Skitag in den Alpen"]},
+{c:"CH",n:"Schweiz",f:"🇨🇭",k:"Europa",t:1,pop:8.8,cap:"Bern",lg:["de","fr"],m:"🏔️",h:["Matterhorn gesehen","Glacier Express","Jungfraujoch","Bad im Bergsee"]},
+{c:"FR",n:"Frankreich",f:"🇫🇷",k:"Europa",t:1,pop:68,cap:"Paris",lg:["fr"],m:"🥐",h:["Eiffelturm","Mont-Saint-Michel","Calanques","Loire-Schloss"]},
+{c:"IT",n:"Italien",f:"🇮🇹",k:"Europa",t:1,pop:59,cap:"Rom",lg:["it"],m:"🍝",h:["Kolosseum","Dolomiten","Cinque Terre","Pompeji & Vesuv"]},
+{c:"ES",n:"Spanien",f:"🇪🇸",k:"Europa",t:1,pop:48,cap:"Madrid",lg:["es"],m:"🥘",h:["Sagrada Família","Alhambra","Jakobsweg-Etappe","Picos de Europa"]},
+{c:"PT",n:"Portugal",f:"🇵🇹",k:"Europa",t:1,pop:10.5,cap:"Lissabon",lg:["pt"],m:"🐟",h:["Sintra","Douro-Tal","Algarve-Klippen","Fado-Abend"]},
+{c:"NL",n:"Niederlande",f:"🇳🇱",k:"Europa",t:1,pop:18,cap:"Amsterdam",lg:["nl"],m:"🌷",h:["Grachtenfahrt","Mühlen von Kinderdijk","Wattenmeer-Insel","Tagestour mit dem Rad"]},
+{c:"BE",n:"Belgien",f:"🇧🇪",k:"Europa",t:1,pop:11.7,cap:"Brüssel",lg:["nl","fr"],m:"🍟",h:["Grote Markt Brüssel","Brügger Kanäle","Trappistenbier an der Quelle","Fritten mit Sauce"]},
+{c:"LU",n:"Luxemburg",f:"🇱🇺",k:"Europa",t:2,pop:.66,cap:"Luxemburg",lg:["fr","de"],m:"🏰",h:["Kasematten","Müllerthal-Trail","Felsenaltstadt","Moseltal"]},
+{c:"GB",n:"Vereinigtes Königreich",f:"🇬🇧",k:"Europa",t:1,pop:68,cap:"London",lg:["en"],m:"☕",i:1,h:["Tower Bridge","Stonehenge","Scottish Highlands","Lake District"]},
+{c:"IE",n:"Irland",f:"🇮🇪",k:"Europa",t:1,pop:5.3,cap:"Dublin",lg:["en"],m:"🍀",i:1,h:["Cliffs of Moher","Ring of Kerry","Pub mit Livemusik","Connemara"]},
+{c:"DK",n:"Dänemark",f:"🇩🇰",k:"Europa",t:1,pop:5.9,cap:"Kopenhagen",lg:["da"],m:"🚲",h:["Nyhavn","Louisiana Museum","Skagen & Grenen","Smørrebrød"]},
+{c:"SE",n:"Schweden",f:"🇸🇪",k:"Europa",t:1,pop:10.5,cap:"Stockholm",lg:["sv"],m:"🫎",arc:1,h:["Gamla Stan","Schärengarten","Abisko & Nordlicht","Elch gesehen"]},
+{c:"NO",n:"Norwegen",f:"🇳🇴",k:"Europa",t:2,pop:5.5,cap:"Oslo",lg:["no"],m:"⛰️",arc:1,h:["Geirangerfjord","Preikestolen","Lofoten","Mitternachtssonne"]},
+{c:"FI",n:"Finnland",f:"🇫🇮",k:"Europa",t:2,pop:5.6,cap:"Helsinki",lg:["fi"],m:"🦌",arc:1,h:["Nordlichter","Seenplatte Saimaa","Rauchsauna","Lappland im Winter"]},
+{c:"IS",n:"Island",f:"🇮🇸",k:"Europa",t:2,pop:.39,cap:"Reykjavík",lg:["is"],m:"🌋",i:1,h:["Golden Circle","Jökulsárlón","Papageitaucher","Bad in heißer Quelle"]},
+{c:"PL",n:"Polen",f:"🇵🇱",k:"Europa",t:1,pop:37,cap:"Warschau",lg:["pl"],m:"🦬",h:["Krakauer Altstadt","Salzbergwerk Wieliczka","Masuren","Białowieża-Urwald"]},
+{c:"CZ",n:"Tschechien",f:"🇨🇿",k:"Europa",t:1,pop:10.9,cap:"Prag",lg:["cs"],m:"🍻",h:["Karlsbrücke","Böhmische Schweiz","Český Krumlov","Brauerei in Pilsen"]},
+{c:"SK",n:"Slowakei",f:"🇸🇰",k:"Europa",t:2,pop:5.4,cap:"Bratislava",lg:["sk"],m:"🏔️",h:["Hohe Tatra","Burg Bratislava","Slowakisches Paradies","Eishöhle"]},
+{c:"HU",n:"Ungarn",f:"🇭🇺",k:"Europa",t:1,pop:9.6,cap:"Budapest",lg:["hu"],m:"♨️",h:["Széchenyi-Bad","Parlament Budapest","Plattensee","Ruinenkneipe"]},
+{c:"SI",n:"Slowenien",f:"🇸🇮",k:"Europa",t:2,pop:2.1,cap:"Ljubljana",lg:["sl"],m:"🏞️",h:["Bleder See","Triglav-Nationalpark","Höhlen von Škocjan","Soča-Tal"]},
+{c:"HR",n:"Kroatien",f:"🇭🇷",k:"Europa",t:1,pop:3.9,cap:"Zagreb",lg:["hr"],m:"⛵",h:["Plitvicer Seen","Stadtmauer Dubrovnik","Kornaten","Krka-Wasserfälle"]},
+{c:"BA",n:"Bosnien-Herzegowina",f:"🇧🇦",k:"Europa",t:2,pop:3.2,cap:"Sarajevo",lg:["bs"],m:"🌉",h:["Stari Most in Mostar","Baščaršija Sarajevo","Kravica-Wasserfälle","Sutjeska-Urwald"]},
+{c:"RS",n:"Serbien",f:"🇷🇸",k:"Europa",t:2,pop:6.6,cap:"Belgrad",lg:["sr"],m:"🏰",h:["Belgrader Festung","Novi Sad","Đavolja Varoš","Tara-Nationalpark"]},
+{c:"ME",n:"Montenegro",f:"🇲🇪",k:"Europa",t:2,pop:.62,cap:"Podgorica",lg:["sr"],m:"⛰️",h:["Bucht von Kotor","Durmitor & Žabljak","Skadarsee","Kloster Ostrog"]},
+{c:"XK",n:"Kosovo",f:"🇽🇰",k:"Europa",t:3,pop:1.8,cap:"Pristina",lg:["sq"],m:"⛪",h:["Prizren","Rugova-Schlucht","Kloster Dečani","Bergpanorama bei Peja"]},
+{c:"AL",n:"Albanien",f:"🇦🇱",k:"Europa",t:2,pop:2.8,cap:"Tirana",lg:["sq"],m:"🏖️",h:["Ksamil","Burg von Gjirokastra","Butrint","Theth & Valbona"]},
+{c:"MK",n:"Nordmazedonien",f:"🇲🇰",k:"Europa",t:2,pop:1.8,cap:"Skopje",lg:["mk"],m:"🛶",h:["Ohridsee","Alter Basar Skopje","Mavrovo","Kloster Sveti Naum"]},
+{c:"GR",n:"Griechenland",f:"🇬🇷",k:"Europa",t:1,pop:10.4,cap:"Athen",lg:["el"],m:"🏛️",h:["Akropolis","Meteora-Klöster","Inselhopping","Samaria-Schlucht"]},
+{c:"BG",n:"Bulgarien",f:"🇧🇬",k:"Europa",t:2,pop:6.4,cap:"Sofia",lg:["bg"],m:"🌹",h:["Rila-Kloster","Altstadt Plovdiv","Sieben Rila-Seen","Schwarzmeerküste"]},
+{c:"RO",n:"Rumänien",f:"🇷🇴",k:"Europa",t:2,pop:19,cap:"Bukarest",lg:["ro"],m:"🐻",h:["Transfăgărășan","Schloss Bran","Donaudelta","Bären in den Karpaten"]},
+{c:"MD",n:"Moldau",f:"🇲🇩",k:"Europa",t:3,pop:2.5,cap:"Chișinău",lg:["ro"],m:"🍇",h:["Weinkeller Cricova","Orheiul Vechi","Chișinău","Abstecher Transnistrien"]},
+{c:"UA",n:"Ukraine",f:"🇺🇦",k:"Europa",t:3,pop:38,cap:"Kyjiw",lg:["uk"],m:"🌻",h:["Lwiw-Altstadt","Höhlenkloster Kyjiw","Karpaten","Schwarzmeerküste"]},
+{c:"BY",n:"Belarus",f:"🇧🇾",k:"Europa",t:3,pop:9.2,cap:"Minsk",lg:["be","ru"],m:"🦬",h:["Belowescher Heide","Schloss Mir","Minsker Prospekt","Brester Festung"]},
+{c:"RU",n:"Russland",f:"🇷🇺",k:"Europa",t:3,pop:144,cap:"Moskau",lg:["ru"],m:"🚂",arc:1,h:["Roter Platz","Eremitage","Transsib gefahren","Baikalsee"]},
+{c:"EE",n:"Estland",f:"🇪🇪",k:"Europa",t:2,pop:1.4,cap:"Tallinn",lg:["et"],m:"🌲",h:["Tallinner Altstadt","Lahemaa-Nationalpark","Moorwanderung","Sauna"]},
+{c:"LV",n:"Lettland",f:"🇱🇻",k:"Europa",t:2,pop:1.9,cap:"Riga",lg:["lv"],m:"🏛️",h:["Jugendstil in Riga","Gauja-Nationalpark","Jūrmala","Zentralmarkt"]},
+{c:"LT",n:"Litauen",f:"🇱🇹",k:"Europa",t:2,pop:2.9,cap:"Vilnius",lg:["lt"],m:"✝️",h:["Kurische Nehrung","Vilniuser Altstadt","Berg der Kreuze","Trakai"]},
+{c:"TR",n:"Türkei",f:"🇹🇷",k:"Europa",t:1,pop:85,cap:"Ankara",lg:["tr"],m:"🎈",h:["Hagia Sophia","Ballonfahrt Kappadokien","Pamukkale","Lykischer Weg"]},
+{c:"CY",n:"Zypern",f:"🇨🇾",k:"Europa",t:2,pop:1.3,cap:"Nikosia",lg:["el","tr"],m:"🫒",i:1,h:["Troodos-Gebirge","Aphrodite-Felsen","Grüne Linie Nikosia","Akamas-Halbinsel"]},
+{c:"MT",n:"Malta",f:"🇲🇹",k:"Europa",t:2,pop:.55,cap:"Valletta",lg:["mt","en"],m:"🛥️",i:1,h:["Valletta","Blaue Grotte","Megalithtempel","Blue Lagoon auf Comino"]},
+{c:"AD",n:"Andorra",f:"🇦🇩",k:"Europa",t:3,pop:.08,cap:"Andorra la Vella",lg:["ca"],m:"🎿",h:["Grandvalira","Caldea-Therme","Coma Pedrosa","Bergpass gefahren"]},
+{c:"MC",n:"Monaco",f:"🇲🇨",k:"Europa",t:3,pop:.04,cap:"Monaco",lg:["fr"],m:"🏎️",h:["Formel-1-Kurs abgelaufen","Ozeanografisches Museum","Casino Monte-Carlo","Port Hercule"]},
+{c:"SM",n:"San Marino",f:"🇸🇲",k:"Europa",t:3,pop:.034,cap:"San Marino",lg:["it"],m:"🗼",h:["Die drei Türme","Monte Titano","Altstadtgassen","Passstempel geholt"]},
+{c:"VA",n:"Vatikanstadt",f:"🇻🇦",k:"Europa",t:3,pop:.001,cap:"Vatikanstadt",lg:["it"],m:"⛪",h:["Petersdom","Sixtinische Kapelle","Vatikanische Museen","Kuppelaufstieg"]},
+{c:"LI",n:"Liechtenstein",f:"🇱🇮",k:"Europa",t:3,pop:.04,cap:"Vaduz",lg:["de"],m:"🏰",h:["Schloss Vaduz","Fürstensteig","Malbun","Briefmarkenmuseum"]},
 
-{c:"JP",n:"Japan",f:"🇯🇵",k:"Asien",t:2,i:1,h:["Fuji gesehen","Kirschblüte","Onsen","Shinkansen gefahren","Rehe in Nara"]},
-{c:"KR",n:"Südkorea",f:"🇰🇷",k:"Asien",t:2,h:["Gyeongbokgung","Jeju-do","DMZ","Jjimjilbang"]},
-{c:"CN",n:"China",f:"🇨🇳",k:"Asien",t:2,h:["Große Mauer","Terrakotta-Armee","Zhangjiajie","Li-Fluss bei Guilin"]},
-{c:"TW",n:"Taiwan",f:"🇹🇼",k:"Asien",t:3,i:1,h:["Taroko-Schlucht","Nachtmarkt in Taipeh","Sonne-Mond-See","Alishan"]},
-{c:"TH",n:"Thailand",f:"🇹🇭",k:"Asien",t:1,h:["Tauchgang","Khao Sok","Tempel in Chiang Mai","Nachtmarkt","Elefanten-Auffangstation"]},
-{c:"VN",n:"Vietnam",f:"🇻🇳",k:"Asien",t:2,h:["Halong-Bucht","Hội An","Mekongdelta","Hà Giang Loop"]},
-{c:"KH",n:"Kambodscha",f:"🇰🇭",k:"Asien",t:2,h:["Angkor Wat","Tonle Sap","Kardamom-Berge","Killing Fields"]},
-{c:"LA",n:"Laos",f:"🇱🇦",k:"Asien",t:3,h:["Luang Prabang","Kuang-Si-Wasserfälle","Mekong-Bootsfahrt","Ebene der Tonkrüge"]},
-{c:"MY",n:"Malaysia",f:"🇲🇾",k:"Asien",t:2,h:["Petronas Towers","Taman Negara","Borneo-Regenwald","Cameron Highlands"]},
-{c:"SG",n:"Singapur",f:"🇸🇬",k:"Asien",t:2,i:1,h:["Gardens by the Bay","Hawker-Centre","Botanischer Garten","Nachtsafari"]},
-{c:"ID",n:"Indonesien",f:"🇮🇩",k:"Asien",t:2,i:1,s:1,h:["Borobudur","Vulkan Bromo","Komodowarane","Tauchen in Raja Ampat"]},
-{c:"PH",n:"Philippinen",f:"🇵🇭",k:"Asien",t:2,i:1,h:["Chocolate Hills","Reisterrassen Banaue","Palawan","Walhaie gesehen"]},
-{c:"IN",n:"Indien",f:"🇮🇳",k:"Asien",t:2,h:["Taj Mahal","Ganges in Varanasi","Tigersafari","Backwaters in Kerala"]},
-{c:"NP",n:"Nepal",f:"🇳🇵",k:"Asien",t:2,h:["Trek im Himalaya","Kathmandu-Tal","Chitwan-Nationalpark","Everest gesehen"]},
-{c:"LK",n:"Sri Lanka",f:"🇱🇰",k:"Asien",t:2,i:1,h:["Sigiriya","Zugfahrt ins Hochland","Yala-Nationalpark","Teeplantage"]},
-{c:"MV",n:"Malediven",f:"🇲🇻",k:"Asien",t:3,i:1,h:["Riff-Tauchgang","Mantas gesehen","Überwasser-Bungalow","Atoll-Hopping"]},
-{c:"AE",n:"Vereinigte Arabische Emirate",f:"🇦🇪",k:"Asien",t:1,h:["Burj Khalifa","Wüstensafari","Souk in Deira","Moschee in Abu Dhabi"]},
-{c:"OM",n:"Oman",f:"🇴🇲",k:"Asien",t:3,h:["Wahiba Sands","Jebel Shams","Wadi Shab","Schildkröten in Ras al Jinz"]},
-{c:"JO",n:"Jordanien",f:"🇯🇴",k:"Asien",t:2,h:["Petra","Wadi Rum","Totes Meer","Jerash"]},
-{c:"IL",n:"Israel",f:"🇮🇱",k:"Asien",t:2,h:["Jerusalemer Altstadt","Massada","Totes Meer","Tauchen in Eilat"]},
-{c:"GE",n:"Georgien",f:"🇬🇪",k:"Asien",t:3,h:["Kaukasus bei Kasbegi","Tiflis-Altstadt","Swanetien","Weinregion Kachetien"]},
-{c:"AM",n:"Armenien",f:"🇦🇲",k:"Asien",t:3,h:["Kloster Geghard","Sewansee","Tatew-Seilbahn","Ararat gesehen"]},
-{c:"UZ",n:"Usbekistan",f:"🇺🇿",k:"Asien",t:3,h:["Registan in Samarkand","Chiwa","Buchara","Aralsee-Region"]},
-{c:"KZ",n:"Kasachstan",f:"🇰🇿",k:"Asien",t:3,h:["Charyn-Canyon","Kolsai-Seen","Steppenfahrt","Almaty"]},
-{c:"MN",n:"Mongolei",f:"🇲🇳",k:"Asien",t:3,h:["Nacht in der Jurte","Gobi","Chöwsgöl-See","Adlerjäger getroffen"]},
-{c:"BT",n:"Bhutan",f:"🇧🇹",k:"Asien",t:3,h:["Tigernest-Kloster","Dzong in Punakha","Trek im Himalaya","Festival besucht"]},
+{c:"JP",n:"Japan",f:"🇯🇵",k:"Asien",t:2,pop:124,cap:"Tokio",lg:["ja"],m:"⛩️",i:1,h:["Fuji gesehen","Kirschblüte","Onsen","Shinkansen gefahren","Rehe in Nara"]},
+{c:"KR",n:"Südkorea",f:"🇰🇷",k:"Asien",t:2,pop:52,cap:"Seoul",lg:["ko"],m:"🏯",h:["Gyeongbokgung","Jeju-do","DMZ","Jjimjilbang"]},
+{c:"KP",n:"Nordkorea",f:"🇰🇵",k:"Asien",t:3,pop:26,cap:"Pjöngjang",lg:["ko"],m:"🗿",h:["Pjöngjang","DMZ von Norden","Myohyang-Berge"]},
+{c:"CN",n:"China",f:"🇨🇳",k:"Asien",t:2,pop:1412,cap:"Peking",lg:["zh"],m:"🐉",h:["Große Mauer","Terrakotta-Armee","Zhangjiajie","Li-Fluss bei Guilin"]},
+{c:"TW",n:"Taiwan",f:"🇹🇼",k:"Asien",t:3,pop:23,cap:"Taipeh",lg:["zh"],m:"🏙️",i:1,h:["Taroko-Schlucht","Nachtmarkt in Taipeh","Sonne-Mond-See","Alishan"]},
+{c:"MN",n:"Mongolei",f:"🇲🇳",k:"Asien",t:3,pop:3.4,cap:"Ulaanbaatar",lg:["mn"],m:"🦅",h:["Nacht in der Jurte","Gobi","Chöwsgöl-See","Adlerjäger getroffen"]},
+{c:"TH",n:"Thailand",f:"🇹🇭",k:"Asien",t:1,pop:72,cap:"Bangkok",lg:["th"],m:"🐘",h:["Tauchgang","Khao Sok","Tempel in Chiang Mai","Nachtmarkt","Elefanten-Auffangstation"]},
+{c:"VN",n:"Vietnam",f:"🇻🇳",k:"Asien",t:2,pop:99,cap:"Hanoi",lg:["vi"],m:"🛶",h:["Halong-Bucht","Hội An","Mekongdelta","Hà Giang Loop"]},
+{c:"KH",n:"Kambodscha",f:"🇰🇭",k:"Asien",t:2,pop:17,cap:"Phnom Penh",lg:["km"],m:"🛕",h:["Angkor Wat","Tonle Sap","Kardamom-Berge","Killing Fields"]},
+{c:"LA",n:"Laos",f:"🇱🇦",k:"Asien",t:3,pop:7.6,cap:"Vientiane",lg:["lo"],m:"🌊",h:["Luang Prabang","Kuang-Si-Wasserfälle","Mekong-Bootsfahrt","Ebene der Tonkrüge"]},
+{c:"MM",n:"Myanmar",f:"🇲🇲",k:"Asien",t:3,pop:54,cap:"Naypyidaw",lg:["my"],m:"🎈",h:["Bagan","Inle-See","Shwedagon-Pagode"]},
+{c:"MY",n:"Malaysia",f:"🇲🇾",k:"Asien",t:2,pop:34,cap:"Kuala Lumpur",lg:["ms"],m:"🦧",h:["Petronas Towers","Taman Negara","Borneo-Regenwald","Cameron Highlands"]},
+{c:"SG",n:"Singapur",f:"🇸🇬",k:"Asien",t:2,pop:5.9,cap:"Singapur",lg:["en","ms"],m:"🌴",i:1,h:["Gardens by the Bay","Hawker-Centre","Botanischer Garten","Nachtsafari"]},
+{c:"BN",n:"Brunei",f:"🇧🇳",k:"Asien",t:3,pop:.45,cap:"Bandar Seri Begawan",lg:["ms"],m:"🕌",h:["Sultan-Omar-Ali-Moschee","Wasserdorf Kampong Ayer","Ulu-Temburong-Nationalpark"]},
+{c:"ID",n:"Indonesien",f:"🇮🇩",k:"Asien",t:2,pop:279,cap:"Jakarta",lg:["id"],m:"🌋",i:1,s:1,h:["Borobudur","Vulkan Bromo","Komodowarane","Tauchen in Raja Ampat"]},
+{c:"TL",n:"Osttimor",f:"🇹🇱",k:"Asien",t:3,pop:1.4,cap:"Dili",lg:["pt"],m:"🐋",i:1,s:1,h:["Atauro-Insel","Tauchen vor Dili","Mount Ramelau"]},
+{c:"PH",n:"Philippinen",f:"🇵🇭",k:"Asien",t:2,pop:117,cap:"Manila",lg:["en"],m:"🏝️",i:1,h:["Chocolate Hills","Reisterrassen Banaue","Palawan","Walhaie gesehen"]},
+{c:"IN",n:"Indien",f:"🇮🇳",k:"Asien",t:2,pop:1430,cap:"Neu-Delhi",lg:["hi","en"],m:"🐅",h:["Taj Mahal","Ganges in Varanasi","Tigersafari","Backwaters in Kerala"]},
+{c:"PK",n:"Pakistan",f:"🇵🇰",k:"Asien",t:3,pop:240,cap:"Islamabad",lg:["ur","en"],m:"🏔️",h:["Karakorum Highway","Hunza-Tal","Lahore Fort","K2 Basecamp"]},
+{c:"BD",n:"Bangladesch",f:"🇧🇩",k:"Asien",t:3,pop:173,cap:"Dhaka",lg:["bn"],m:"🐅",h:["Sundarbans","Cox's Bazar","Srimangal-Teegärten"]},
+{c:"NP",n:"Nepal",f:"🇳🇵",k:"Asien",t:2,pop:30,cap:"Kathmandu",lg:["ne"],m:"🏔️",h:["Trek im Himalaya","Kathmandu-Tal","Chitwan-Nationalpark","Everest gesehen"]},
+{c:"BT",n:"Bhutan",f:"🇧🇹",k:"Asien",t:3,pop:.79,cap:"Thimphu",lg:["dz"],m:"🛕",h:["Tigernest-Kloster","Dzong in Punakha","Trek im Himalaya","Festival besucht"]},
+{c:"LK",n:"Sri Lanka",f:"🇱🇰",k:"Asien",t:2,pop:22,cap:"Colombo",lg:["si","ta"],m:"🐘",i:1,h:["Sigiriya","Zugfahrt ins Hochland","Yala-Nationalpark","Teeplantage"]},
+{c:"MV",n:"Malediven",f:"🇲🇻",k:"Asien",t:3,pop:.52,cap:"Malé",lg:["dv"],m:"🐠",i:1,h:["Riff-Tauchgang","Mantas gesehen","Überwasser-Bungalow","Atoll-Hopping"]},
+{c:"AF",n:"Afghanistan",f:"🇦🇫",k:"Asien",t:3,pop:42,cap:"Kabul",lg:["ps","fa"],m:"🏜️",h:["Band-e-Amir","Bamiyan-Tal","Wakhan-Korridor"]},
+{c:"IR",n:"Iran",f:"🇮🇷",k:"Asien",t:3,pop:89,cap:"Teheran",lg:["fa"],m:"🕌",h:["Isfahan","Persepolis","Wüste Dasht-e Kavir","Yazd"]},
+{c:"IQ",n:"Irak",f:"🇮🇶",k:"Asien",t:3,pop:45,cap:"Bagdad",lg:["ar"],m:"🏛️",h:["Babylon","Erbil-Zitadelle","Marschen des Südirak"]},
+{c:"SA",n:"Saudi-Arabien",f:"🇸🇦",k:"Asien",t:3,pop:37,cap:"Riad",lg:["ar"],m:"🐫",h:["AlUla & Hegra","Edge of the World","Rotes Meer tauchen","Rub al-Chali"]},
+{c:"AE",n:"Vereinigte Arabische Emirate",f:"🇦🇪",k:"Asien",t:1,pop:9.5,cap:"Abu Dhabi",lg:["ar"],m:"🏙️",h:["Burj Khalifa","Wüstensafari","Souk in Deira","Moschee in Abu Dhabi"]},
+{c:"OM",n:"Oman",f:"🇴🇲",k:"Asien",t:3,pop:4.6,cap:"Maskat",lg:["ar"],m:"🐢",h:["Wahiba Sands","Jebel Shams","Wadi Shab","Schildkröten in Ras al Jinz"]},
+{c:"QA",n:"Katar",f:"🇶🇦",k:"Asien",t:3,pop:2.7,cap:"Doha",lg:["ar"],m:"🐪",h:["Souq Waqif","Museum of Islamic Art","Dünen von Khor al-Adaid"]},
+{c:"KW",n:"Kuwait",f:"🇰🇼",k:"Asien",t:3,pop:4.3,cap:"Kuwait-Stadt",lg:["ar"],m:"🗼",h:["Kuwait Towers","Souk Al-Mubarakiya","Failaka-Insel"]},
+{c:"BH",n:"Bahrain",f:"🇧🇭",k:"Asien",t:3,pop:1.5,cap:"Manama",lg:["ar"],m:"🌳",i:1,h:["Bahrain Fort","Baum des Lebens","Formel-1-Strecke"]},
+{c:"YE",n:"Jemen",f:"🇾🇪",k:"Asien",t:3,pop:34,cap:"Sanaa",lg:["ar"],m:"🌳",h:["Sokotra","Altstadt von Sanaa","Shibam"]},
+{c:"JO",n:"Jordanien",f:"🇯🇴",k:"Asien",t:2,pop:11.3,cap:"Amman",lg:["ar"],m:"🏜️",h:["Petra","Wadi Rum","Totes Meer","Jerash"]},
+{c:"IL",n:"Israel",f:"🇮🇱",k:"Asien",t:2,pop:9.8,cap:"Jerusalem",lg:["he"],m:"🕍",h:["Jerusalemer Altstadt","Massada","Totes Meer","Tauchen in Eilat"]},
+{c:"PS",n:"Palästina",f:"🇵🇸",k:"Asien",t:3,pop:5.4,cap:"Ramallah",lg:["ar"],m:"🕌",h:["Bethlehem","Jericho","Hebron"]},
+{c:"LB",n:"Libanon",f:"🇱🇧",k:"Asien",t:3,pop:5.4,cap:"Beirut",lg:["ar"],m:"🌲",h:["Baalbek","Zedern des Libanon","Jeita-Grotte","Byblos"]},
+{c:"SY",n:"Syrien",f:"🇸🇾",k:"Asien",t:3,pop:23,cap:"Damaskus",lg:["ar"],m:"🏛️",h:["Altstadt von Damaskus","Krak des Chevaliers","Aleppo"]},
+{c:"GE",n:"Georgien",f:"🇬🇪",k:"Asien",t:3,pop:3.7,cap:"Tiflis",lg:["ka"],m:"🍷",h:["Kaukasus bei Kasbegi","Tiflis-Altstadt","Swanetien","Weinregion Kachetien"]},
+{c:"AM",n:"Armenien",f:"🇦🇲",k:"Asien",t:3,pop:2.8,cap:"Jerewan",lg:["hy"],m:"⛪",h:["Kloster Geghard","Sewansee","Tatew-Seilbahn","Ararat gesehen"]},
+{c:"AZ",n:"Aserbaidschan",f:"🇦🇿",k:"Asien",t:3,pop:10.4,cap:"Baku",lg:["az"],m:"🔥",h:["Altstadt von Baku","Feuertempel Ateshgah","Schlammvulkane","Scheki"]},
+{c:"KZ",n:"Kasachstan",f:"🇰🇿",k:"Asien",t:3,pop:20,cap:"Astana",lg:["kk","ru"],m:"🐎",h:["Charyn-Canyon","Kolsai-Seen","Steppenfahrt","Almaty"]},
+{c:"UZ",n:"Usbekistan",f:"🇺🇿",k:"Asien",t:3,pop:36,cap:"Taschkent",lg:["uz"],m:"🕌",h:["Registan in Samarkand","Chiwa","Buchara","Aralsee-Region"]},
+{c:"TM",n:"Turkmenistan",f:"🇹🇲",k:"Asien",t:3,pop:6.5,cap:"Aschgabat",lg:["tk"],m:"🔥",h:["Darvaza-Gaskrater","Aschgabat","Merw"]},
+{c:"KG",n:"Kirgisistan",f:"🇰🇬",k:"Asien",t:3,pop:7,cap:"Bischkek",lg:["ky","ru"],m:"🏔️",h:["Song-Köl","Ala-Archa","Nacht in der Jurte","Issyk-Kul"]},
+{c:"TJ",n:"Tadschikistan",f:"🇹🇯",k:"Asien",t:3,pop:10.3,cap:"Duschanbe",lg:["tg"],m:"🛣️",h:["Pamir Highway","Iskanderkulsee","Fan-Gebirge"]},
+{c:"MA",n:"Marokko",f:"🇲🇦",k:"Afrika",t:1,pop:38,cap:"Rabat",lg:["ar"],m:"🐪",h:["Medina von Fès","Sahara-Nacht","Atlas-Trekking","Chefchaouen"]},
+{c:"DZ",n:"Algerien",f:"🇩🇿",k:"Afrika",t:3,pop:46,cap:"Algier",lg:["ar"],m:"🏜️",h:["Hoggar-Gebirge","Timgad","Kasbah von Algier"]},
+{c:"TN",n:"Tunesien",f:"🇹🇳",k:"Afrika",t:2,pop:12.5,cap:"Tunis",lg:["ar"],m:"🏺",h:["Karthago","Medina von Tunis","Sahara bei Douz","Djerba"]},
+{c:"LY",n:"Libyen",f:"🇱🇾",k:"Afrika",t:3,pop:7.3,cap:"Tripolis",lg:["ar"],m:"🏛️",h:["Leptis Magna","Sabratha","Akakus-Felsbilder"]},
+{c:"EG",n:"Ägypten",f:"🇪🇬",k:"Afrika",t:1,pop:113,cap:"Kairo",lg:["ar"],m:"🔺",h:["Pyramiden von Gizeh","Tal der Könige","Tauchen im Roten Meer","Nilfahrt"]},
+{c:"SD",n:"Sudan",f:"🇸🇩",k:"Afrika",t:3,pop:48,cap:"Khartum",lg:["ar"],m:"🔺",h:["Pyramiden von Meroe","Nilzusammenfluss","Nubische Wüste"]},
+{c:"SS",n:"Südsudan",f:"🇸🇸",k:"Afrika",t:3,pop:11,cap:"Juba",lg:["en"],m:"🦌",h:["Boma-Nationalpark","Sudd-Sumpf","Juba"]},
+{c:"ER",n:"Eritrea",f:"🇪🇷",k:"Afrika",t:3,pop:3.7,cap:"Asmara",lg:["ti","ar"],m:"🏛️",h:["Asmara","Dahlak-Archipel","Massaua"]},
+{c:"ET",n:"Äthiopien",f:"🇪🇹",k:"Afrika",t:3,pop:127,cap:"Addis Abeba",lg:["am"],m:"⛪",h:["Felsenkirchen Lalibela","Simien-Berge","Danakil-Senke","Omo-Tal"]},
+{c:"DJ",n:"Dschibuti",f:"🇩🇯",k:"Afrika",t:3,pop:1.1,cap:"Dschibuti",lg:["fr","ar"],m:"🦈",h:["Assalsee","Walhaie im Golf von Tadjoura","Lac Abbé"]},
+{c:"SO",n:"Somalia",f:"🇸🇴",k:"Afrika",t:3,pop:18,cap:"Mogadischu",lg:["so","ar"],m:"🐫",h:["Laas Geel","Berbera-Küste","Mogadischu"]},
+{c:"KE",n:"Kenia",f:"🇰🇪",k:"Afrika",t:2,pop:55,cap:"Nairobi",lg:["sw","en"],m:"🦁",h:["Masai Mara","Amboseli","Lake Nakuru","Diani Beach"]},
+{c:"UG",n:"Uganda",f:"🇺🇬",k:"Afrika",t:3,pop:48,cap:"Kampala",lg:["en","sw"],m:"🦍",h:["Berggorillas","Schimpansen in Kibale","Murchison Falls","Nilquelle"]},
+{c:"RW",n:"Ruanda",f:"🇷🇼",k:"Afrika",t:3,pop:14,cap:"Kigali",lg:["rw","en"],m:"🦍",s:1,h:["Gorilla-Tracking","Nyungwe-Wald","Kivusee","Kigali"]},
+{c:"BI",n:"Burundi",f:"🇧🇮",k:"Afrika",t:3,pop:13,cap:"Gitega",lg:["rn","fr"],m:"🥁",s:1,h:["Tanganjikasee","Trommler von Gitega","Rusizi-Nationalpark"]},
+{c:"TZ",n:"Tansania",f:"🇹🇿",k:"Afrika",t:2,pop:67,cap:"Dodoma",lg:["sw","en"],m:"🦓",s:1,h:["Serengeti","Ngorongoro-Krater","Kilimandscharo","Sansibar"]},
+{c:"MZ",n:"Mosambik",f:"🇲🇿",k:"Afrika",t:3,pop:33,cap:"Maputo",lg:["pt"],m:"🐋",s:1,h:["Bazaruto-Archipel","Quirimbas","Gorongosa"]},
+{c:"MW",n:"Malawi",f:"🇲🇼",k:"Afrika",t:3,pop:21,cap:"Lilongwe",lg:["en","ny"],m:"🐠",s:1,h:["Malawisee","Liwonde-Nationalpark","Mount Mulanje"]},
+{c:"ZM",n:"Sambia",f:"🇿🇲",k:"Afrika",t:3,pop:20,cap:"Lusaka",lg:["en"],m:"💦",s:1,h:["Victoriafälle","South Luangwa","Sambesi-Safari"]},
+{c:"ZW",n:"Simbabwe",f:"🇿🇼",k:"Afrika",t:3,pop:16,cap:"Harare",lg:["en","sn"],m:"💦",s:1,h:["Victoriafälle","Hwange-Nationalpark","Great Zimbabwe"]},
+{c:"BW",n:"Botswana",f:"🇧🇼",k:"Afrika",t:3,pop:2.6,cap:"Gaborone",lg:["en","tn"],m:"🐘",s:1,h:["Okavangodelta","Chobe","Makgadikgadi-Salzpfannen","Mokoro-Fahrt"]},
+{c:"NA",n:"Namibia",f:"🇳🇦",k:"Afrika",t:3,pop:2.6,cap:"Windhoek",lg:["en"],m:"🏜️",s:1,h:["Sossusvlei","Etosha","Skelettküste","Nacht unter der Milchstraße"]},
+{c:"ZA",n:"Südafrika",f:"🇿🇦",k:"Afrika",t:2,pop:60,cap:"Pretoria",lg:["en","af"],m:"🦏",s:1,h:["Tafelberg","Krüger-Nationalpark","Kap der Guten Hoffnung","Garden Route"]},
+{c:"LS",n:"Lesotho",f:"🇱🇸",k:"Afrika",t:3,pop:2.3,cap:"Maseru",lg:["st","en"],m:"🐴",s:1,h:["Sani Pass","Maletsunyane-Fälle","Ponyritt im Hochland"]},
+{c:"SZ",n:"Eswatini",f:"🇸🇿",k:"Afrika",t:3,pop:1.2,cap:"Mbabane",lg:["en","ss"],m:"🦏",s:1,h:["Hlane Royal Park","Malolotja","Ezulwini-Tal"]},
+{c:"AO",n:"Angola",f:"🇦🇴",k:"Afrika",t:3,pop:36,cap:"Luanda",lg:["pt"],m:"🏜️",s:1,h:["Kalandula-Fälle","Namib bei Tombua","Luanda"]},
+{c:"CD",n:"DR Kongo",f:"🇨🇩",k:"Afrika",t:3,pop:102,cap:"Kinshasa",lg:["fr"],m:"🌋",s:1,h:["Virunga & Nyiragongo","Berggorillas","Kongo-Fluss"]},
+{c:"CG",n:"Republik Kongo",f:"🇨🇬",k:"Afrika",t:3,pop:6,cap:"Brazzaville",lg:["fr"],m:"🦍",s:1,h:["Odzala-Nationalpark","Brazzaville","Lésio-Louna"]},
+{c:"GA",n:"Gabun",f:"🇬🇦",k:"Afrika",t:3,pop:2.4,cap:"Libreville",lg:["fr"],m:"🐘",s:1,h:["Loango-Nationalpark","Waldelefanten am Strand","Ivindo-Fälle"]},
+{c:"CM",n:"Kamerun",f:"🇨🇲",k:"Afrika",t:3,pop:28,cap:"Yaoundé",lg:["fr","en"],m:"🌋",h:["Mount Cameroon","Waza-Nationalpark","Kribi-Strände"]},
+{c:"CF",n:"Zentralafrikanische Republik",f:"🇨🇫",k:"Afrika",t:3,pop:5.7,cap:"Bangui",lg:["fr","sg"],m:"🦋",h:["Dzanga-Sangha","Bangui","Chinko-Reservat"]},
+{c:"TD",n:"Tschad",f:"🇹🇩",k:"Afrika",t:3,pop:18,cap:"N'Djamena",lg:["fr","ar"],m:"🏜️",h:["Ennedi-Massiv","Zakouma-Nationalpark","Lakes of Ounianga"]},
+{c:"NE",n:"Niger",f:"🇳🇪",k:"Afrika",t:3,pop:26,cap:"Niamey",lg:["fr"],m:"🐪",h:["Aïr-Gebirge","Ténéré","W-Nationalpark"]},
+{c:"NG",n:"Nigeria",f:"🇳🇬",k:"Afrika",t:3,pop:224,cap:"Abuja",lg:["en"],m:"🥁",h:["Yankari-Reservat","Zuma Rock","Lagos"]},
+{c:"BJ",n:"Benin",f:"🇧🇯",k:"Afrika",t:3,pop:13,cap:"Porto-Novo",lg:["fr"],m:"🛶",h:["Ganvié-Pfahldorf","Pendjari-Nationalpark","Ouidah"]},
+{c:"TG",n:"Togo",f:"🇹🇬",k:"Afrika",t:3,pop:9,cap:"Lomé",lg:["fr"],m:"🏘️",h:["Koutammakou","Lomé","Kpalimé-Berge"]},
+{c:"GH",n:"Ghana",f:"🇬🇭",k:"Afrika",t:3,pop:34,cap:"Accra",lg:["en"],m:"🥁",h:["Cape Coast Castle","Kakum Canopy Walk","Mole-Nationalpark"]},
+{c:"CI",n:"Elfenbeinküste",f:"🇨🇮",k:"Afrika",t:3,pop:29,cap:"Yamoussoukro",lg:["fr"],m:"⛪",h:["Taï-Nationalpark","Basilika Yamoussoukro","Grand-Bassam"]},
+{c:"LR",n:"Liberia",f:"🇱🇷",k:"Afrika",t:3,pop:5.4,cap:"Monrovia",lg:["en"],m:"🌴",h:["Sapo-Nationalpark","Robertsport","Monrovia"]},
+{c:"SL",n:"Sierra Leone",f:"🇸🇱",k:"Afrika",t:3,pop:8.6,cap:"Freetown",lg:["en"],m:"🏖️",h:["Tiwai Island","Banana Islands","Freetown-Halbinsel"]},
+{c:"GN",n:"Guinea",f:"🇬🇳",k:"Afrika",t:3,pop:14,cap:"Conakry",lg:["fr"],m:"⛰️",h:["Fouta Djallon","Wasserfälle von Ditinn","Conakry"]},
+{c:"GW",n:"Guinea-Bissau",f:"🇬🇼",k:"Afrika",t:3,pop:2.2,cap:"Bissau",lg:["pt"],m:"🐢",h:["Bijagós-Archipel","Bissau","Cantanhez-Wald"]},
+{c:"SN",n:"Senegal",f:"🇸🇳",k:"Afrika",t:3,pop:18,cap:"Dakar",lg:["fr"],m:"🦩",h:["Île de Gorée","Lac Rose","Djoudj-Vogelpark","Casamance"]},
+{c:"GM",n:"Gambia",f:"🇬🇲",k:"Afrika",t:3,pop:2.8,cap:"Banjul",lg:["en"],m:"🦜",h:["Gambia-Fluss","Abuko-Reservat","Kachikally-Krokodile"]},
+{c:"MR",n:"Mauretanien",f:"🇲🇷",k:"Afrika",t:3,pop:4.9,cap:"Nouakchott",lg:["ar"],m:"🚂",h:["Erzzug gefahren","Banc d'Arguin","Chinguetti"]},
+{c:"ML",n:"Mali",f:"🇲🇱",k:"Afrika",t:3,pop:23,cap:"Bamako",lg:["fr"],m:"🕌",h:["Djenné","Timbuktu","Dogon-Land"]},
+{c:"BF",n:"Burkina Faso",f:"🇧🇫",k:"Afrika",t:3,pop:23,cap:"Ouagadougou",lg:["fr"],m:"🐘",h:["Sindou-Felsen","Nazinga-Reservat","Ouagadougou"]},
+{c:"CV",n:"Kap Verde",f:"🇨🇻",k:"Afrika",t:3,pop:.59,cap:"Praia",lg:["pt"],m:"🌋",i:1,h:["Pico do Fogo","Wanderung auf Santo Antão","Schildkröten","Morna-Abend"]},
+{c:"ST",n:"São Tomé und Príncipe",f:"🇸🇹",k:"Afrika",t:3,pop:.23,cap:"São Tomé",lg:["pt"],m:"🍫",i:1,h:["Pico Cão Grande","Kakaoplantage","Príncipe"]},
+{c:"GQ",n:"Äquatorialguinea",f:"🇬🇶",k:"Afrika",t:3,pop:1.7,cap:"Malabo",lg:["es","fr"],m:"🌋",h:["Bioko-Insel","Monte Alén","Malabo"]},
+{c:"KM",n:"Komoren",f:"🇰🇲",k:"Afrika",t:3,pop:.85,cap:"Moroni",lg:["ar","fr"],m:"🌋",i:1,s:1,h:["Karthala-Vulkan","Mohéli-Meerespark","Moroni"]},
+{c:"MG",n:"Madagaskar",f:"🇲🇬",k:"Afrika",t:3,pop:30,cap:"Antananarivo",lg:["mg","fr"],m:"🐒",i:1,s:1,h:["Lemuren gesehen","Avenue der Baobabs","Tsingy de Bemaraha","Regenwald von Andasibe"]},
+{c:"SC",n:"Seychellen",f:"🇸🇨",k:"Afrika",t:3,pop:.13,cap:"Victoria",lg:["en","fr"],m:"🐢",i:1,s:1,h:["Anse Source d'Argent","Vallée de Mai","Riesenschildkröten","Schnorcheln"]},
+{c:"MU",n:"Mauritius",f:"🇲🇺",k:"Afrika",t:3,pop:1.3,cap:"Port Louis",lg:["en","fr"],m:"🏝️",i:1,s:1,h:["Black River Gorges","Le Morne","Siebenfarbige Erde","Tauchgang"]},
 
-{c:"MA",n:"Marokko",f:"🇲🇦",k:"Afrika",t:1,h:["Medina von Fès","Sahara-Nacht","Atlas-Trekking","Chefchaouen"]},
-{c:"TN",n:"Tunesien",f:"🇹🇳",k:"Afrika",t:2,h:["Karthago","Medina von Tunis","Sahara bei Douz","Djerba"]},
-{c:"EG",n:"Ägypten",f:"🇪🇬",k:"Afrika",t:1,h:["Pyramiden von Gizeh","Tal der Könige","Tauchen im Roten Meer","Nilfahrt"]},
-{c:"ZA",n:"Südafrika",f:"🇿🇦",k:"Afrika",t:2,s:1,h:["Tafelberg","Krüger-Nationalpark","Kap der Guten Hoffnung","Garden Route"]},
-{c:"NA",n:"Namibia",f:"🇳🇦",k:"Afrika",t:3,s:1,h:["Sossusvlei","Etosha","Skelettküste","Nacht unter der Milchstraße"]},
-{c:"BW",n:"Botswana",f:"🇧🇼",k:"Afrika",t:3,s:1,h:["Okavangodelta","Chobe","Makgadikgadi-Salzpfannen","Mokoro-Fahrt"]},
-{c:"TZ",n:"Tansania",f:"🇹🇿",k:"Afrika",t:2,s:1,h:["Serengeti","Ngorongoro-Krater","Kilimandscharo","Sansibar"]},
-{c:"KE",n:"Kenia",f:"🇰🇪",k:"Afrika",t:2,h:["Masai Mara","Amboseli","Lake Nakuru","Diani Beach"]},
-{c:"UG",n:"Uganda",f:"🇺🇬",k:"Afrika",t:3,h:["Berggorillas","Schimpansen in Kibale","Murchison Falls","Nilquelle"]},
-{c:"RW",n:"Ruanda",f:"🇷🇼",k:"Afrika",t:3,s:1,h:["Gorilla-Tracking","Nyungwe-Wald","Kivusee","Kigali"]},
-{c:"ET",n:"Äthiopien",f:"🇪🇹",k:"Afrika",t:3,h:["Felsenkirchen Lalibela","Simien-Berge","Danakil-Senke","Omo-Tal"]},
-{c:"MG",n:"Madagaskar",f:"🇲🇬",k:"Afrika",t:3,i:1,s:1,h:["Lemuren gesehen","Avenue der Baobabs","Tsingy de Bemaraha","Regenwald von Andasibe"]},
-{c:"CV",n:"Kap Verde",f:"🇨🇻",k:"Afrika",t:3,i:1,h:["Pico do Fogo","Wanderung auf Santo Antão","Schildkröten","Morna-Abend"]},
-{c:"SC",n:"Seychellen",f:"🇸🇨",k:"Afrika",t:3,i:1,s:1,h:["Anse Source d'Argent","Vallée de Mai","Riesenschildkröten","Schnorcheln"]},
-{c:"MU",n:"Mauritius",f:"🇲🇺",k:"Afrika",t:3,i:1,s:1,h:["Black River Gorges","Le Morne","Siebenfarbige Erde","Tauchgang"]},
+{c:"US",n:"USA",f:"🇺🇸",k:"Nordamerika",t:1,pop:335,cap:"Washington, D.C.",lg:["en"],m:"🗽",h:["Golden Gate Bridge","Empire State Building","Grand Canyon","Yellowstone","Roadtrip über einen Highway"]},
+{c:"CA",n:"Kanada",f:"🇨🇦",k:"Nordamerika",t:2,pop:40,cap:"Ottawa",lg:["en","fr"],m:"🍁",arc:1,h:["Banff & Lake Louise","Niagarafälle","Wale vor Vancouver Island","Polarlicht im Yukon"]},
+{c:"MX",n:"Mexiko",f:"🇲🇽",k:"Nordamerika",t:1,pop:129,cap:"Mexiko-Stadt",lg:["es"],m:"🌵",h:["Chichén Itzá","Cenote-Tauchgang","Teotihuacán","Monarchfalter"]},
+{c:"GT",n:"Guatemala",f:"🇬🇹",k:"Nordamerika",t:3,pop:18,cap:"Guatemala-Stadt",lg:["es"],m:"🌋",h:["Tikal","Atitlán-See","Antigua","Vulkan Acatenango"]},
+{c:"BZ",n:"Belize",f:"🇧🇿",k:"Nordamerika",t:3,pop:.41,cap:"Belmopan",lg:["en"],m:"🐠",h:["Great Blue Hole","Barriereriff","Caracol","Dschungelhöhle"]},
+{c:"SV",n:"El Salvador",f:"🇸🇻",k:"Nordamerika",t:3,pop:6.4,cap:"San Salvador",lg:["es"],m:"🌊",h:["Ruta de las Flores","Vulkan Santa Ana","Surfen in El Tunco","Joya de Cerén"]},
+{c:"HN",n:"Honduras",f:"🇭🇳",k:"Nordamerika",t:3,pop:10.6,cap:"Tegucigalpa",lg:["es"],m:"🐬",h:["Roatán tauchen","Copán","Pico Bonito"]},
+{c:"NI",n:"Nicaragua",f:"🇳🇮",k:"Nordamerika",t:3,pop:7,cap:"Managua",lg:["es"],m:"🌋",h:["Granada","Insel Ometepe","Vulkan Masaya","Corn Islands"]},
+{c:"CR",n:"Costa Rica",f:"🇨🇷",k:"Nordamerika",t:2,pop:5.2,cap:"San José",lg:["es"],m:"🦥",h:["Vulkan Arenal","Monteverde-Nebelwald","Faultier gesehen","Corcovado"]},
+{c:"PA",n:"Panama",f:"🇵🇦",k:"Nordamerika",t:3,pop:4.5,cap:"Panama-Stadt",lg:["es"],m:"🚢",h:["Panamakanal","Bocas del Toro","San Blas","Altstadt von Panama-Stadt"]},
+{c:"CU",n:"Kuba",f:"🇨🇺",k:"Nordamerika",t:2,pop:11,cap:"Havanna",lg:["es"],m:"🚗",i:1,h:["Habana Vieja","Viñales-Tal","Trinidad","Oldtimer-Fahrt"]},
+{c:"JM",n:"Jamaika",f:"🇯🇲",k:"Nordamerika",t:3,pop:2.8,cap:"Kingston",lg:["en"],m:"🎶",i:1,h:["Blue Mountains","Dunn's River Falls","Negril","Reggae-Abend"]},
+{c:"HT",n:"Haiti",f:"🇭🇹",k:"Nordamerika",t:3,pop:11.6,cap:"Port-au-Prince",lg:["fr","ht"],m:"🏰",i:1,h:["Citadelle Laferrière","Bassin Bleu","Jacmel"]},
+{c:"DO",n:"Dominikanische Republik",f:"🇩🇴",k:"Nordamerika",t:2,pop:11.3,cap:"Santo Domingo",lg:["es"],m:"🐋",i:1,h:["Zona Colonial","Los Haitises","Buckelwale bei Samaná","Pico Duarte"]},
+{c:"BS",n:"Bahamas",f:"🇧🇸",k:"Nordamerika",t:3,pop:.41,cap:"Nassau",lg:["en"],m:"🐖",i:1,h:["Exuma-Schweine","Blue Holes","Andros-Riff"]},
+{c:"BB",n:"Barbados",f:"🇧🇧",k:"Nordamerika",t:3,pop:.28,cap:"Bridgetown",lg:["en"],m:"🐢",i:1,h:["Harrison's Cave","Bathsheba","Schildkröten schnorcheln"]},
+{c:"TT",n:"Trinidad und Tobago",f:"🇹🇹",k:"Nordamerika",t:3,pop:1.5,cap:"Port of Spain",lg:["en"],m:"🦜",i:1,h:["Caroni-Sumpf","Pitch Lake","Karneval"]},
+{c:"AG",n:"Antigua und Barbuda",f:"🇦🇬",k:"Nordamerika",t:3,pop:.09,cap:"St. John's",lg:["en"],m:"⛵",i:1,h:["Nelson's Dockyard","Devil's Bridge","Segeltörn"]},
+{c:"DM",n:"Dominica",f:"🇩🇲",k:"Nordamerika",t:3,pop:.07,cap:"Roseau",lg:["en"],m:"♨️",i:1,h:["Boiling Lake","Waitukubuli Trail","Champagne Reef"]},
+{c:"LC",n:"St. Lucia",f:"🇱🇨",k:"Nordamerika",t:3,pop:.18,cap:"Castries",lg:["en"],m:"⛰️",i:1,h:["Pitons","Sulphur Springs","Marigot Bay"]},
+{c:"VC",n:"St. Vincent und die Grenadinen",f:"🇻🇨",k:"Nordamerika",t:3,pop:.1,cap:"Kingstown",lg:["en"],m:"⛵",i:1,h:["Tobago Cays","La Soufrière","Bequia"]},
+{c:"GD",n:"Grenada",f:"🇬🇩",k:"Nordamerika",t:3,pop:.13,cap:"St. George's",lg:["en"],m:"🌰",i:1,h:["Grand Anse","Unterwasser-Skulpturenpark","Muskatplantage"]},
+{c:"KN",n:"St. Kitts und Nevis",f:"🇰🇳",k:"Nordamerika",t:3,pop:.05,cap:"Basseterre",lg:["en"],m:"🚂",i:1,h:["Brimstone Hill","Zuckerrohrbahn","Nevis Peak"]},
 
-{c:"US",n:"USA",f:"🇺🇸",k:"Nordamerika",t:1,h:["Golden Gate Bridge","Empire State Building","Grand Canyon","Yellowstone","Roadtrip über einen Highway"]},
-{c:"CA",n:"Kanada",f:"🇨🇦",k:"Nordamerika",t:2,p:1,h:["Banff & Lake Louise","Niagarafälle","Wale vor Vancouver Island","Polarlicht im Yukon"]},
-{c:"MX",n:"Mexiko",f:"🇲🇽",k:"Nordamerika",t:1,h:["Chichén Itzá","Cenote-Tauchgang","Teotihuacán","Monarchfalter"]},
-{c:"CU",n:"Kuba",f:"🇨🇺",k:"Nordamerika",t:2,i:1,h:["Habana Vieja","Viñales-Tal","Trinidad","Oldtimer-Fahrt"]},
-{c:"CR",n:"Costa Rica",f:"🇨🇷",k:"Nordamerika",t:2,h:["Vulkan Arenal","Monteverde-Nebelwald","Faultier gesehen","Corcovado"]},
-{c:"PA",n:"Panama",f:"🇵🇦",k:"Nordamerika",t:3,h:["Panamakanal","Bocas del Toro","San Blas","Altstadt von Panama-Stadt"]},
-{c:"GT",n:"Guatemala",f:"🇬🇹",k:"Nordamerika",t:3,h:["Tikal","Atitlán-See","Antigua","Vulkan Acatenango"]},
-{c:"BZ",n:"Belize",f:"🇧🇿",k:"Nordamerika",t:3,h:["Great Blue Hole","Barriereriff","Caracol","Dschungelhöhle"]},
-{c:"JM",n:"Jamaika",f:"🇯🇲",k:"Nordamerika",t:3,i:1,h:["Blue Mountains","Dunn's River Falls","Negril","Reggae-Abend"]},
-{c:"DO",n:"Dominikanische Republik",f:"🇩🇴",k:"Nordamerika",t:2,i:1,h:["Zona Colonial","Los Haitises","Buckelwale bei Samaná","Pico Duarte"]},
+{c:"BR",n:"Brasilien",f:"🇧🇷",k:"Südamerika",t:2,pop:216,cap:"Brasília",lg:["pt"],m:"⛰️",s:1,h:["Zuckerhut","Iguaçu-Wasserfälle","Pantanal","Amazonas-Tour"]},
+{c:"AR",n:"Argentinien",f:"🇦🇷",k:"Südamerika",t:2,pop:46,cap:"Buenos Aires",lg:["es"],m:"💃",s:1,h:["Perito Moreno","Iguazú","Torres-Trek in Patagonien","Weingut in Mendoza"]},
+{c:"CL",n:"Chile",f:"🇨🇱",k:"Südamerika",t:2,pop:19.6,cap:"Santiago",lg:["es"],m:"🗿",s:1,h:["Atacama","Torres del Paine","Osterinsel","Valparaíso"]},
+{c:"PE",n:"Peru",f:"🇵🇪",k:"Südamerika",t:2,pop:34,cap:"Lima",lg:["es"],m:"🦙",s:1,h:["Machu Picchu","Rainbow Mountain","Titicacasee","Nazca-Linien"]},
+{c:"BO",n:"Bolivien",f:"🇧🇴",k:"Südamerika",t:3,pop:12.4,cap:"Sucre",lg:["es"],m:"🧂",s:1,h:["Salar de Uyuni","Todesstraße","Titicacasee","Amazonas-Tiefland"]},
+{c:"EC",n:"Ecuador",f:"🇪🇨",k:"Südamerika",t:3,pop:18,cap:"Quito",lg:["es"],m:"🐢",s:1,h:["Galápagos","Quito-Altstadt","Cotopaxi","Äquator-Denkmal"]},
+{c:"CO",n:"Kolumbien",f:"🇨🇴",k:"Südamerika",t:2,pop:52,cap:"Bogotá",lg:["es"],m:"☕",h:["Cartagena","Kaffeezone","Tayrona","Valle de Cocora"]},
+{c:"VE",n:"Venezuela",f:"🇻🇪",k:"Südamerika",t:3,pop:28,cap:"Caracas",lg:["es"],m:"💦",h:["Salto Ángel","Roraima-Tepui","Los Roques"]},
+{c:"GY",n:"Guyana",f:"🇬🇾",k:"Südamerika",t:3,pop:.81,cap:"Georgetown",lg:["en"],m:"💦",h:["Kaieteur-Fälle","Iwokrama-Regenwald","Rupununi-Savanne"]},
+{c:"SR",n:"Suriname",f:"🇸🇷",k:"Südamerika",t:3,pop:.62,cap:"Paramaribo",lg:["nl"],m:"🌳",h:["Central Suriname Reserve","Paramaribo","Galibi-Schildkröten"]},
+{c:"PY",n:"Paraguay",f:"🇵🇾",k:"Südamerika",t:3,pop:6.9,cap:"Asunción",lg:["es","gn"],m:"🌿",s:1,h:["Jesuitenruinen","Gran Chaco","Asunción"]},
+{c:"UY",n:"Uruguay",f:"🇺🇾",k:"Südamerika",t:3,pop:3.4,cap:"Montevideo",lg:["es"],m:"🧉",s:1,h:["Colonia del Sacramento","Punta del Este","Montevideo","Asado"]},
 
-{c:"BR",n:"Brasilien",f:"🇧🇷",k:"Südamerika",t:2,s:1,h:["Zuckerhut","Iguaçu-Wasserfälle","Pantanal","Amazonas-Tour"]},
-{c:"AR",n:"Argentinien",f:"🇦🇷",k:"Südamerika",t:2,s:1,h:["Perito Moreno","Iguazú","Torres-Trek in Patagonien","Weingut in Mendoza"]},
-{c:"CL",n:"Chile",f:"🇨🇱",k:"Südamerika",t:2,s:1,h:["Atacama","Torres del Paine","Osterinsel","Valparaíso"]},
-{c:"PE",n:"Peru",f:"🇵🇪",k:"Südamerika",t:2,s:1,h:["Machu Picchu","Rainbow Mountain","Titicacasee","Nazca-Linien"]},
-{c:"BO",n:"Bolivien",f:"🇧🇴",k:"Südamerika",t:3,s:1,h:["Salar de Uyuni","Todesstraße","Titicacasee","Amazonas-Tiefland"]},
-{c:"EC",n:"Ecuador",f:"🇪🇨",k:"Südamerika",t:3,s:1,h:["Galápagos","Quito-Altstadt","Cotopaxi","Äquator-Denkmal"]},
-{c:"CO",n:"Kolumbien",f:"🇨🇴",k:"Südamerika",t:2,h:["Cartagena","Kaffeezone","Tayrona","Valle de Cocora"]},
-{c:"UY",n:"Uruguay",f:"🇺🇾",k:"Südamerika",t:3,s:1,h:["Colonia del Sacramento","Punta del Este","Montevideo","Asado"]},
-
-{c:"AU",n:"Australien",f:"🇦🇺",k:"Ozeanien",t:2,i:1,s:1,h:["Great Barrier Reef","Uluru","Great Ocean Road","Känguru in freier Wildbahn"]},
-{c:"NZ",n:"Neuseeland",f:"🇳🇿",k:"Ozeanien",t:2,i:1,s:1,h:["Milford Sound","Tongariro Crossing","Fjordland-Wanderung","Kiwi gesehen"]},
-{c:"FJ",n:"Fidschi",f:"🇫🇯",k:"Ozeanien",t:3,i:1,s:1,h:["Riff-Tauchgang","Yasawa-Inseln","Kava-Zeremonie","Sabeto-Hot-Springs"]},
-{c:"PF",n:"Französisch-Polynesien",f:"🇵🇫",k:"Ozeanien",t:3,i:1,s:1,h:["Bora Bora","Lagunentour","Buckelwale","Moorea"]},
-{c:"PG",n:"Papua-Neuguinea",f:"🇵🇬",k:"Ozeanien",t:3,i:1,s:1,h:["Kokoda Track","Sepik-Fluss","Paradiesvogel gesehen","Tauchen bei Kimbe Bay"]},
-{c:"VU",n:"Vanuatu",f:"🇻🇺",k:"Ozeanien",t:3,i:1,s:1,h:["Vulkan Yasur","Blue Holes","Wrack-Tauchgang","Tanna-Insel"]}
+{c:"AU",n:"Australien",f:"🇦🇺",k:"Ozeanien",t:2,pop:26,cap:"Canberra",lg:["en"],m:"🦘",i:1,s:1,h:["Great Barrier Reef","Uluru","Great Ocean Road","Känguru in freier Wildbahn"]},
+{c:"NZ",n:"Neuseeland",f:"🇳🇿",k:"Ozeanien",t:2,pop:5.2,cap:"Wellington",lg:["en","mi"],m:"🥝",i:1,s:1,h:["Milford Sound","Tongariro Crossing","Fjordland-Wanderung","Kiwi gesehen"]},
+{c:"PG",n:"Papua-Neuguinea",f:"🇵🇬",k:"Ozeanien",t:3,pop:10.3,cap:"Port Moresby",lg:["en"],m:"🦜",i:1,s:1,h:["Kokoda Track","Sepik-Fluss","Paradiesvogel gesehen","Tauchen bei Kimbe Bay"]},
+{c:"FJ",n:"Fidschi",f:"🇫🇯",k:"Ozeanien",t:3,pop:.93,cap:"Suva",lg:["en","fj"],m:"🐠",i:1,s:1,h:["Riff-Tauchgang","Yasawa-Inseln","Kava-Zeremonie","Sabeto-Hot-Springs"]},
+{c:"SB",n:"Salomonen",f:"🇸🇧",k:"Ozeanien",t:3,pop:.74,cap:"Honiara",lg:["en"],m:"🤿",i:1,s:1,h:["Wrack-Tauchgang","Marovo-Lagune","Honiara"]},
+{c:"VU",n:"Vanuatu",f:"🇻🇺",k:"Ozeanien",t:3,pop:.33,cap:"Port Vila",lg:["bi","en"],m:"🌋",i:1,s:1,h:["Vulkan Yasur","Blue Holes","Wrack-Tauchgang","Tanna-Insel"]},
+{c:"WS",n:"Samoa",f:"🇼🇸",k:"Ozeanien",t:3,pop:.22,cap:"Apia",lg:["sm","en"],m:"🏊",i:1,s:1,h:["To-Sua-Ocean-Trench","Lalomanu Beach","Fale-Übernachtung"]},
+{c:"TO",n:"Tonga",f:"🇹🇴",k:"Ozeanien",t:3,pop:.11,cap:"Nukuʻalofa",lg:["to","en"],m:"🐋",i:1,s:1,h:["Mit Walen schwimmen","Blowholes","Vavaʻu"]},
+{c:"KI",n:"Kiribati",f:"🇰🇮",k:"Ozeanien",t:3,pop:.13,cap:"Tarawa",lg:["en"],m:"🐟",i:1,h:["Kiritimati","Tarawa-Wracks","Riff-Fischen"]},
+{c:"TV",n:"Tuvalu",f:"🇹🇻",k:"Ozeanien",t:3,pop:.011,cap:"Funafuti",lg:["tvl","en"],m:"✈️",i:1,s:1,h:["Funafuti-Lagune","Landebahn am Abend","Insel-Hopping"]},
+{c:"NR",n:"Nauru",f:"🇳🇷",k:"Ozeanien",t:3,pop:.012,cap:"Yaren",lg:["na","en"],m:"🪨",i:1,s:1,h:["Buada-Lagune","Phosphat-Terrassen","Anibare Bay"]},
+{c:"PW",n:"Palau",f:"🇵🇼",k:"Ozeanien",t:3,pop:.018,cap:"Ngerulmud",lg:["en"],m:"🪼",i:1,h:["Jellyfish Lake","Rock Islands","Blue Corner tauchen"]},
+{c:"MH",n:"Marshallinseln",f:"🇲🇭",k:"Ozeanien",t:3,pop:.042,cap:"Majuro",lg:["mh","en"],m:"🤿",i:1,h:["Bikini-Atoll","Majuro","Wrack-Tauchgang"]},
+{c:"FM",n:"Mikronesien",f:"🇫🇲",k:"Ozeanien",t:3,pop:.11,cap:"Palikir",lg:["en"],m:"🗿",i:1,h:["Nan Madol","Chuuk-Lagune","Yap-Mantas"]},
+{c:"PF",n:"Französisch-Polynesien",f:"🇵🇫",k:"Ozeanien",t:3,pop:.28,cap:"Papeete",lg:["fr"],m:"🌺",i:1,s:1,h:["Bora Bora","Lagunentour","Buckelwale","Moorea"]}
 ];
 const KONT=["Europa","Asien","Afrika","Nordamerika","Südamerika","Ozeanien"];
 const NACHBARN=["DK","PL","CZ","AT","CH","FR","LU","BE","NL"];
+const MAGELLAN=["ES","BR","AR","CL","PH","BN","ID","TL","CV"];
+const KONT_MOTIV={Europa:"🏰",Asien:"🏯",Afrika:"🦁",Nordamerika:"🌄",Südamerika:"⛰️",Ozeanien:"🏝️"};
+
+/* ====== Teilen ====== */
+let GUEST=false;
+const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function toB64(bytes){let o="";for(let i=0;i<bytes.length;i+=3){
+  const a=bytes[i],b=bytes[i+1],c=bytes[i+2],n=(a<<16)|((b||0)<<8)|(c||0);
+  o+=B64[n>>18&63]+B64[n>>12&63]+(b===undefined?"":B64[n>>6&63])+(c===undefined?"":B64[n&63]);}
+  return o;}
+function fromB64(str){const out=[];let buf=0,bits=0;
+  for(const ch of str){const v=B64.indexOf(ch); if(v<0)continue; buf=(buf<<6)|v; bits+=6;
+    if(bits>=8){bits-=8;out.push((buf>>bits)&255);}}
+  return Uint8Array.from(out);}
+
+function encodeShare(){
+  const enc=new TextEncoder(), out=[];
+  const put=(arr)=>{out.push(arr.length&255);for(const b of arr)out.push(b);};
+  out.push(1);
+  put(enc.encode((state.name||"").slice(0,40)));
+  put(enc.encode((state.flair||"").slice(0,40)));
+  const a=achs(), mask=new Uint8Array(Math.ceil(ACHDEF.length/8));
+  a.forEach((z,i)=>{if(z.ok)mask[i>>3]|=1<<(i&7);});
+  mask.forEach(b=>out.push(b));
+  const v=visited().filter(x=>x.c.length===2&&BASE.some(z=>z.c===x.c));
+  out.push(v.length>>8&255,v.length&255);
+  v.forEach(x=>{const r=rec(x.c);
+    out.push(x.c.charCodeAt(0),x.c.charCodeAt(1));
+    const y=r.first?parseInt(r.first.slice(0,4),10)-1900:0;
+    const mo=r.first?parseInt(r.first.slice(5,7),10)||0:0;
+    out.push(y>0&&y<256?y:0, mo, Math.min(5,r.rating||0), Math.min(255,(r.hl||[]).length));});
+  return toB64(Uint8Array.from(out));
+}
+function decodeShare(str){
+  try{
+    const b=fromB64(str); let i=0; if(b[i++]!==1) return null;
+    const dec=new TextDecoder();
+    const rd=()=>{const n=b[i++],s=dec.decode(b.slice(i,i+n));i+=n;return s;};
+    const name=rd(), flair=rd();
+    const mb=Math.ceil(ACHDEF.length/8), mask=b.slice(i,i+mb); i+=mb;
+    const cnt=(b[i]<<8)|b[i+1]; i+=2;
+    const d={};
+    for(let k=0;k<cnt;k++){
+      const code=String.fromCharCode(b[i],b[i+1]); i+=2;
+      const y=b[i++], mo=b[i++], rating=b[i++], hln=b[i++];
+      d[code]={v:1,first:y?(1900+y)+"-"+String(mo||1).padStart(2,"0")+"-01":"",visits:1,days:"",modes:[],cities:"",food:"",
+               rating,note:"",hl:Array(hln).fill("·"),extra:[],photos:[]};
+    }
+    return {name,flair,d,mask};
+  }catch(e){return null;}
+}
+let gMask=null;
 
 /* ====== Speicher ====== */
 const KEY="reisepass.v1";
-let memOnly=false, state={name:"",custom:[],d:{}};
+let memOnly=false, state={name:"",photo:"",flair:"",custom:[],d:{}};
+function migrate(){
+  Object.values(state.d||{}).forEach(r=>{
+    if(r.mode!==undefined){ r.modes=r.mode?[r.mode]:[]; delete r.mode; }
+    if(!Array.isArray(r.modes)) r.modes=[];
+  });
+}
 function load(){
-  try{const r=localStorage.getItem(KEY); if(r) state=Object.assign(state,JSON.parse(r));}
-  catch(e){memOnly=true;}
+  try{const r=localStorage.getItem(KEY); if(r) state=Object.assign(state,JSON.parse(r));}catch(e){memOnly=true;}
+  migrate();
 }
 function save(){
-  if(memOnly) return;
+  if(GUEST||memOnly) return;
   try{localStorage.setItem(KEY,JSON.stringify(state));}
-  catch(e){
-    memOnly=true;
-    toast("Speicher voll. Exportiere deine Daten und entferne ein paar Fotos.");
-  }
+  catch(e){memOnly=true;toast("Speicher voll. Exportiere deine Daten und entferne ein paar Fotos.");}
 }
-function toast(msg){
-  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("on");
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2600);
-}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");
+  clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("on"),2800);}
 
 /* ====== Ableitungen ====== */
 const all=()=>BASE.concat(state.custom||[]);
 const byCode=c=>all().find(x=>x.c===c);
 const rec=c=>state.d[c]||null;
 const visited=()=>all().filter(x=>rec(x.c)&&rec(x.c).v);
-function doneCount(c){const r=rec(c);return r&&r.hl?r.hl.length:0;}
-function totalHl(){return all().reduce((s,x)=>s+doneCount(x.c),0);}
-function contSet(){return new Set(visited().map(x=>x.k));}
-function xp(){
-  let p=0;
-  visited().forEach(x=>{p+=10*(x.t||1)});
-  p+=3*totalHl();
-  p+=15*achs().filter(a=>a.ok).length;
-  return p;
-}
-function photoCount(){return Object.values(state.d).reduce((s,r)=>s+((r.photos||[]).length),0);}
-function modeCount(m){return visited().filter(x=>rec(x.c).mode===m).length;}
+const doneCount=c=>{const r=rec(c);return r&&r.hl?r.hl.length:0};
+const totalHl=()=>all().reduce((s,x)=>s+doneCount(x.c),0);
+const contSet=()=>new Set(visited().map(x=>x.k));
+const photoCount=()=>Object.values(state.d).reduce((s,r)=>s+((r.photos||[]).length),0);
+const hasMode=m=>visited().filter(x=>(rec(x.c).modes||[]).includes(m)).length;
+const xpLaender=()=>visited().reduce((s,x)=>s+10*(x.t||1),0);
+const xpZiele=()=>3*totalHl();
+const xpOrden=()=>15*achs().filter(a=>a.ok).length;
+const xp=()=>xpLaender()+xpZiele()+xpOrden();
+const STUFE=80;
 
 const ACHDEF=[
- {ic:"🛂",t:"Erster Stempel",d:"Ein Land mit Übernachtung",f:()=>[visited().length,1]},
- {ic:"✈️",t:"Zehnerclub",d:"10 Länder",f:()=>[visited().length,10]},
- {ic:"🌎",t:"Zwanzig",d:"20 Länder",f:()=>[visited().length,20]},
- {ic:"🌐",t:"Halbes Hundert",d:"50 Länder",f:()=>[visited().length,50]},
- {ic:"🗺️",t:"Kontinentsprung",d:"2 Kontinente",f:()=>[contSet().size,2]},
- {ic:"🧭",t:"Weltenbummler",d:"4 Kontinente",f:()=>[contSet().size,4]},
- {ic:"🏆",t:"Alle Kontinente",d:"6 von 6",f:()=>[contSet().size,6]},
- {ic:"🏝️",t:"Inselstaat",d:"Ein Inselstaat besucht",f:()=>[visited().filter(x=>x.i).length,1]},
- {ic:"❄️",t:"Polarkreis",d:"Land mit Gebiet nördlich des Polarkreises",f:()=>[visited().filter(x=>x.p).length,1]},
- {ic:"☀️",t:"Südhalbkugel",d:"Land südlich des Äquators",f:()=>[visited().filter(x=>x.s).length,1]},
- {ic:"🚗",t:"Mit dem Auto",d:"Ein Land per Auto erreicht",f:()=>[modeCount("Auto"),1]},
- {ic:"🚆",t:"Mit dem Zug",d:"Ein Land per Zug erreicht",f:()=>[modeCount("Zug"),1]},
- {ic:"🛤️",t:"Schienennetz",d:"5 Länder per Zug erreicht",f:()=>[modeCount("Zug"),5]},
- {ic:"⛴️",t:"Über Wasser",d:"Ein Land per Schiff erreicht",f:()=>[modeCount("Schiff"),1]},
- {ic:"🌱",t:"Landratte",d:"8 Länder ohne Flug erreicht",f:()=>[visited().filter(x=>rec(x.c).mode&&rec(x.c).mode!=="Flug").length,8]},
- {ic:"📍",t:"Nachbarschaft",d:"Alle 9 Nachbarländer Deutschlands",f:()=>[NACHBARN.filter(c=>rec(c)&&rec(c).v).length,9]},
- {ic:"🎯",t:"Sammler",d:"25 Ziele im Land abgehakt",f:()=>[totalHl(),25]},
- {ic:"🔁",t:"Wiederholungstäter",d:"Ein Land 3× besucht",f:()=>[Math.max(0,...visited().map(x=>rec(x.c).visits||1)),3]},
- {ic:"⏳",t:"Langstrecke",d:"14 Tage am Stück in einem Land",f:()=>[Math.max(0,...visited().map(x=>+rec(x.c).days||0)),14]},
- {ic:"💎",t:"Legendär",d:"Ein Land der Stufe legendär",f:()=>[visited().filter(x=>x.t===3).length,1]},
- {ic:"📸",t:"Bildband",d:"10 Fotos eingeklebt",f:()=>[photoCount(),10]},
- {ic:"⭐",t:"Bestnote",d:"Ein Land mit 5 Sternen",f:()=>[visited().filter(x=>(rec(x.c).rating||0)===5).length,1]}
+ {id:"first",ic:"🛂",t:"Erster Stempel",d:"Ein Land mit Übernachtung",fl:"Erstreisende:r",f:()=>[visited().length,1]},
+ {id:"ten",ic:"✈️",t:"Zehnerclub",d:"10 Länder",f:()=>[visited().length,10]},
+ {id:"twenty",ic:"🌎",t:"Zwanzig",d:"20 Länder",fl:"Vielgereiste:r",f:()=>[visited().length,20]},
+ {id:"fifty",ic:"🌐",t:"Halbes Hundert",d:"50 Länder",fl:"Weltensammler:in",f:()=>[visited().length,50]},
+ {id:"k2",ic:"🗺️",t:"Kontinentsprung",d:"2 Kontinente",f:()=>[contSet().size,2]},
+ {id:"k4",ic:"🧭",t:"Weltenbummler",d:"4 Kontinente",fl:"Kontinentsammler:in",f:()=>[contSet().size,4]},
+ {id:"k6",ic:"🏆",t:"Alle Kontinente",d:"6 von 6",fl:"Erdumspanner:in",f:()=>[contSet().size,6]},
+ {id:"isle",ic:"🏝️",t:"Inselstaat",d:"Ein Inselstaat besucht",fl:"Inselhüpfer:in",f:()=>[visited().filter(x=>x.i).length,1]},
+ {id:"arc",ic:"❄️",t:"Polarkreis",d:"Land mit Gebiet nördlich des Polarkreises",fl:"Polarfahrer:in",f:()=>[visited().filter(x=>x.arc).length,1]},
+ {id:"south",ic:"☀️",t:"Südhalbkugel",d:"Land südlich des Äquators",f:()=>[visited().filter(x=>x.s).length,1]},
+ {id:"car",ic:"🚗",t:"Mit dem Auto",d:"Ein Land per Auto erreicht",f:()=>[hasMode("Auto"),1]},
+ {id:"train1",ic:"🚆",t:"Mit dem Zug",d:"Ein Land per Zug erreicht",f:()=>[hasMode("Zug"),1]},
+ {id:"train5",ic:"🛤️",t:"Schienennetz",d:"5 Länder per Zug erreicht",fl:"Schienenreisende:r",f:()=>[hasMode("Zug"),5]},
+ {id:"ship",ic:"⛴️",t:"Über Wasser",d:"Ein Land per Schiff erreicht",f:()=>[hasMode("Schiff"),1]},
+ {id:"noplane",ic:"🌱",t:"Landratte",d:"8 Länder ohne Flug erreicht",fl:"Landratte",
+   f:()=>[visited().filter(x=>{const m=rec(x.c).modes||[];return m.length&&!m.includes("Flug")}).length,8]},
+ {id:"nb",ic:"📍",t:"Nachbarschaft",d:"Alle 9 Nachbarländer Deutschlands",fl:"Grenzgänger:in",
+   f:()=>[NACHBARN.filter(c=>rec(c)&&rec(c).v).length,9]},
+ {id:"small",ic:"🔬",t:"Kleinstaaten-Kenner",d:"5 Länder mit weniger als 1 Mio. Einwohnern",fl:"Kleinstaaten-Kenner:in",
+   f:()=>[visited().filter(x=>x.pop<1).length,5]},
+ {id:"big5",ic:"🐘",t:"Die Großen Fünf",d:"Die fünf bevölkerungsreichsten Länder der Erde",fl:"Milliardenreisende:r",
+   f:()=>{const top=BASE.slice().sort((a,b)=>b.pop-a.pop).slice(0,5).map(x=>x.c);
+          return [top.filter(c=>rec(c)&&rec(c).v).length,5]}},
+ {id:"magellan",ic:"⛵",t:"Auf Magellans Route",d:"Alle 9 Länder der ersten Weltumsegelung 1519–1522",fl:"Weltumsegler:in",
+   f:()=>[MAGELLAN.filter(c=>rec(c)&&rec(c).v).length,MAGELLAN.length]},
+ {id:"es3",ic:"🇪🇸",t:"Spanisch für Anfänger",d:"3 Länder mit Spanisch als Amtssprache",
+   f:()=>[visited().filter(x=>(x.lg||[]).includes("es")).length,3]},
+ {id:"es8",ic:"📚",t:"Spanisch für Fortgeschrittene",d:"8 Länder mit Spanisch als Amtssprache",fl:"Hispanist:in",
+   f:()=>[visited().filter(x=>(x.lg||[]).includes("es")).length,8]},
+ {id:"hl25",ic:"🎯",t:"Sammler",d:"25 Ziele im Land abgehakt",f:()=>[totalHl(),25]},
+ {id:"again",ic:"🔁",t:"Wiederholungstäter",d:"Ein Land 3× besucht",fl:"Stammgast",f:()=>[Math.max(0,...visited().map(x=>rec(x.c).visits||1)),3]},
+ {id:"long",ic:"⏳",t:"Langstrecke",d:"14 Tage am Stück in einem Land",fl:"Langstreckler:in",f:()=>[Math.max(0,...visited().map(x=>+rec(x.c).days||0)),14]},
+ {id:"leg",ic:"💎",t:"Legendär",d:"Ein Land der Stufe legendär",fl:"Legendenjäger:in",f:()=>[visited().filter(x=>x.t===3).length,1]},
+ {id:"photo",ic:"📸",t:"Bildband",d:"10 Fotos eingeklebt",fl:"Chronist:in",f:()=>[photoCount(),10]},
+ {id:"five",ic:"⭐",t:"Bestnote",d:"Ein Land mit 5 Sternen",f:()=>[visited().filter(x=>(rec(x.c).rating||0)===5).length,1]}
 ];
-function achs(){return ACHDEF.map(a=>{const[c,n]=a.f();return Object.assign({},a,{cur:Math.min(c,n),need:n,ok:c>=n})})}
+function achs(){
+  if(GUEST&&gMask) return ACHDEF.map((a,i)=>Object.assign({},a,{cur:0,need:0,ok:!!(gMask[i>>3]&(1<<(i&7)))}));
+  return ACHDEF.map(a=>{const[c,n]=a.f();return Object.assign({},a,{cur:Math.min(c,n),need:n,ok:c>=n})});
+}
+function flairs(){return achs().filter(a=>a.fl).map(a=>({name:a.fl,ok:a.ok,von:a.t}))}
 
 /* ====== Rendering ====== */
 let tab="dex", filter="all", kfilter="", q="", justStamped=null;
+const INKS=["var(--stamp)","var(--stamp-red)","var(--stamp-teal)","var(--stamp-blue)"];
+const SHAPES=["s-round","s-oval","s-rect"];
+const hash=s=>[...s].reduce((a,c)=>a+c.charCodeAt(0),0);
+const motiv=x=>x.m||KONT_MOTIV[x.k]||"🌍";
+const nf=n=>n>=1?(n>=100?Math.round(n):n.toFixed(1).replace(".",","))+" Mio.":Math.round(n*1000)+" Tsd.";
 
 function renderPass(){
-  const v=visited().length, tot=all().length, p=xp(), lvl=1+Math.floor(p/80), prog=p%80;
+  const v=visited().length,tot=all().length,p=xp(),lvl=1+Math.floor(p/STUFE),prog=p%STUFE;
   document.getElementById("lvlOut").textContent=lvl;
   document.getElementById("cntOut").innerHTML=v+"<small>/"+tot+"</small>";
-  document.getElementById("xpFill").style.width=(prog/80*100)+"%";
+  document.getElementById("xpFill").style.width=(prog/STUFE*100)+"%";
+  document.getElementById("flairOut").textContent=state.flair||"";
+  const ph=document.getElementById("passPhoto");
+  ph.innerHTML=state.photo?`<img src="${state.photo}" alt="Passfoto">`:"Foto";
   const nm=(state.name||"Reisende:r").toUpperCase().replace(/[^A-Z0-9ÄÖÜ ]/g,"").replace(/ /g,"<");
   const pad=(s,n)=>(s+"<".repeat(Math.max(0,n-s.length))).slice(0,n);
   document.getElementById("mrz1").textContent=pad("P<DEX"+nm+"<<",44);
-  document.getElementById("mrz2").textContent=pad(
-    "L"+String(v).padStart(3,"0")+"<<K"+contSet().size+"<<XP"+String(p).padStart(5,"0")+
-    "<<ORD"+String(achs().filter(a=>a.ok).length).padStart(2,"0"),44);
+  document.getElementById("mrz2").textContent=pad("L"+String(v).padStart(3,"0")+"<<K"+contSet().size+
+    "<<XP"+String(p).padStart(5,"0")+"<<ORD"+String(achs().filter(a=>a.ok).length).padStart(2,"0"),44);
 }
 
 function renderDex(){
-  const g=document.getElementById("grid"); g.innerHTML="";
-  const cf=document.getElementById("contFilters");
+  const g=document.getElementById("grid"),cf=document.getElementById("contFilters");
   if(!cf.dataset.done){
     cf.innerHTML='<button class="chip" data-k="" aria-pressed="true">Weltweit</button>'+
       KONT.map(k=>`<button class="chip" data-k="${k}" aria-pressed="false">${k}</button>`).join("");
@@ -507,16 +635,16 @@ function renderDex(){
     if(filter==="visited"&&!(r&&r.v))return false;
     if(filter==="open"&&(r&&r.v))return false;
     if(kfilter&&x.k!==kfilter)return false;
-    if(q&&!(x.n.toLowerCase().includes(q)||x.c.toLowerCase().includes(q)))return false;
+    if(q&&!(x.n.toLowerCase().includes(q)||x.c.toLowerCase().includes(q)||(x.cap||"").toLowerCase().includes(q)))return false;
     return true;
   }).sort((a,b)=>a.n.localeCompare(b.n,"de"));
-  if(!list.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">Kein Land gefunden. Andere Suche oder Filter probieren.</div>';return;}
+  g.innerHTML="";
+  if(!list.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">Kein Land gefunden.</div>';justStamped=null;return;}
   list.forEach(x=>{
-    const r=rec(x.c), on=r&&r.v;
+    const r=rec(x.c),on=r&&r.v,hl=(x.h||[]).length+((r&&r.extra)?r.extra.length:0);
     const b=document.createElement("button");
     b.className="card"+(on?"":" un")+(x.t===3?" tier3":"")+(justStamped===x.c?" stamped":"");
     b.dataset.code=x.c;
-    const hl=(x.h||[]).length+((r&&r.extra)?r.extra.length:0);
     b.innerHTML=`<div><div class="flag">${x.f}</div><div class="nm">${x.n}</div></div>
       <div class="meta">${on?(doneCount(x.c)+"/"+hl+" Ziele"):(x.t===3?"legendär":x.t===2?"selten":"häufig")}</div>
       ${on?`<div class="mini"><b>${x.c}</b>${(r.first||"").slice(0,4)||"—"}</div>`:""}`;
@@ -526,66 +654,117 @@ function renderDex(){
 }
 
 function renderBook(){
-  const s=document.getElementById("bookStats"), b=document.getElementById("book");
-  const v=visited(), days=v.reduce((a,x)=>a+(+rec(x.c).days||0),0);
-  const rated=v.filter(x=>rec(x.c).rating);
-  const best=rated.sort((a,c)=>rec(c.c).rating-rec(a.c).rating)[0];
-  const stat=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
-  s.innerHTML=stat(v.length,"Länder")+stat(contSet().size+"/6","Kontinente")+stat(totalHl(),"Ziele")+
-    stat(Math.max(0,...v.map(x=>+rec(x.c).days||0))||0,"Längste Reise (T)")+
-    stat(photoCount(),"Fotos")+stat(best?best.f:"—","Bestbewertet");
-  if(!v.length){b.innerHTML='<div class="empty" style="grid-column:1/-1">Noch kein Stempel. Öffne im Dex ein Land und markiere es als besucht.</div>';return;}
-  b.innerHTML=v.sort((a,c)=>(rec(a.c).first||"9").localeCompare(rec(c.c).first||"9")).map((x,i)=>{
-    const r=rec(x.c);
-    const d=r.first?new Date(r.first).toLocaleDateString("de-DE",{month:"2-digit",year:"numeric"}):"– / –";
-    return `<button class="bigstamp${i%2?" alt":""}" data-code="${x.c}">
-      <div class="cc">${x.c}</div><div class="nn">${x.n}</div><div class="dd">${d}</div></button>`;
+  const s=document.getElementById("bookStats"),b=document.getElementById("book"),v=visited();
+  const rated=v.filter(x=>rec(x.c).rating).sort((a,c)=>rec(c.c).rating-rec(a.c).rating);
+  const st=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  s.innerHTML=st(v.length,"Länder")+st(contSet().size+"/6","Kontinente")+st(totalHl(),"Ziele")+
+    st(Math.max(0,...v.map(x=>+rec(x.c).days||0))||0,"Längste Reise (T)")+st(photoCount(),"Fotos")+
+    st(rated[0]?rated[0].f:"—","Bestbewertet");
+  if(!v.length){b.innerHTML='<div class="empty" style="grid-column:1/-1">Noch kein Stempel. Öffne im Dex ein Land und setze einen.</div>';return;}
+  b.innerHTML=v.sort((a,c)=>(rec(a.c).first||"9").localeCompare(rec(c.c).first||"9")).map(x=>{
+    const r=rec(x.c),h=hash(x.c);
+    const d=r.first?new Date(r.first).toLocaleDateString("de-DE",{month:"2-digit",year:"numeric"}).replace("/","·"):"–·–";
+    return `<button class="bigstamp ${SHAPES[h%3]}" style="--c:${INKS[h%4]};transform:rotate(${(h%7)-3}deg)" data-code="${x.c}">
+      <div class="mot">${motiv(x)}</div><div class="cc">${x.c}</div>
+      <div class="nn">${x.n.toUpperCase()}</div><div class="dd">${d}</div></button>`;
   }).join("");
 }
 
 function renderAch(){
-  document.getElementById("achList").innerHTML=achs().map(a=>`
-    <div class="ach${a.ok?"":" locked"}">
-      <div class="ic">${a.ic}</div>
-      <div><div class="t">${a.t}</div><div class="d">${a.d}</div>
-      <div class="pg">${a.ok?"Erhalten":a.cur+" / "+a.need}</div></div>
-    </div>`).join("");
+  const a=achs();
+  document.getElementById("achList").innerHTML=
+    `<p class="note" style="margin-bottom:12px">${a.filter(z=>z.ok).length} von ${a.length} Orden · jeder Orden bringt 15 XP.</p>`+
+    a.map(z=>`<div class="ach${z.ok?"":" locked"}"><div class="ic">${z.ic}</div>
+      <div><div class="t">${z.t}</div><div class="d">${z.d}</div>
+      <div class="pg">${z.ok?"Erhalten"+(z.fl?" · Flair „"+z.fl+"“":""):(GUEST?"Noch offen":z.cur+" / "+z.need)}</div></div></div>`).join("");
+}
+
+function renderProf(){
+  const p=xp(),lvl=1+Math.floor(p/STUFE),rest=STUFE-(p%STUFE),v=visited().length;
+  const row=(a,b)=>`<div class="xprow"><span>${a}</span><b>${b}</b></div>`;
+  document.getElementById("profBody").innerHTML=`
+    <div class="panel">
+      <h3>Stufe ${lvl}</h3>
+      <div class="xpbar" style="margin-bottom:9px"><i style="width:${(p%STUFE)/STUFE*100}%"></i></div>
+      <p class="note">Noch <b>${rest} XP</b> bis Stufe ${lvl+1}. Jede Stufe kostet ${STUFE} XP.</p>
+    </div>
+    <div class="panel">
+      <h3>Woher die XP kommen</h3>
+      ${row(v+" Länder (häufig 10, selten 20, legendär 30)",xpLaender())}
+      ${row(totalHl()+" Ziele à 3",xpZiele())}
+      ${row(achs().filter(a=>a.ok).length+" Orden à 15",xpOrden())}
+      <div class="xprow sum"><span><b>Summe</b></span><b>${p} XP</b></div>
+      <p class="note" style="margin-top:9px">Schnellster Weg nach oben: ein legendäres Land bringt 30 XP, ein Orden 15.</p>
+    </div>
+    ${GUEST?"":`<div class="panel">
+      <h3>Flair</h3>
+      <div class="flairs">
+        <button data-flair="" class="${state.flair?"":"on"}">ohne</button>
+        ${flairs().map(f=>`<button data-flair="${f.name}" class="${f.ok?(state.flair===f.name?"on":""):"lock"}" ${f.ok?"":"disabled"} title="${f.ok?"":"Orden: "+f.von}">${f.name}</button>`).join("")}
+      </div>
+      <p class="note" style="margin-top:9px">Gesperrte Flairs schaltest du über den jeweiligen Orden frei.</p>
+    </div>
+    <div class="panel">
+      <h3>Passfoto</h3>
+      <div class="rowbtns" style="margin:0">
+        <button class="smallbtn" id="setPhoto">Foto wählen</button>
+        ${state.photo?'<button class="smallbtn danger" id="delPhoto">Foto entfernen</button>':""}
+      </div>
+    </div>`}`;
 }
 
 function renderData(){
-  document.getElementById("storeWarn").innerHTML = memOnly
-    ? '<div class="warn">Dieser Browser speichert gerade nichts dauerhaft (z.&nbsp;B. in der Vorschau oder im privaten Modus). Lade die Datei herunter und öffne sie direkt, dann bleiben deine Einträge erhalten.</div>' : "";
+  document.getElementById("storeWarn").innerHTML=memOnly
+    ?'<div class="warn">Dieser Browser speichert gerade nichts dauerhaft. Prüfe, ob du im privaten Modus bist.</div>':"";
+  const st=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
   const bytes=new Blob([JSON.stringify(state)]).size;
-  const stat=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
-  document.getElementById("dataStats").innerHTML=
-    stat(visited().length,"Einträge")+stat(photoCount(),"Fotos")+stat((bytes/1048576).toFixed(2)+" MB","Belegter Platz");
+  document.getElementById("dataStats").innerHTML=st(visited().length,"Einträge")+st(photoCount(),"Fotos")+
+    st((bytes/1048576).toFixed(2)+" MB","Belegter Platz");
 }
-
 function render(){
   renderPass();
-  if(tab==="dex")renderDex(); else if(tab==="book")renderBook();
-  else if(tab==="ach")renderAch(); else renderData();
+  ({dex:renderDex,book:renderBook,ach:renderAch,prof:renderProf,data:renderData})[tab]();
 }
 
 /* ====== Länderseite ====== */
 let openCode=null;
-const MODES=["","Flug","Auto","Zug","Bus","Schiff","Fahrrad","zu Fuß"];
-function ensure(c){ if(!state.d[c]) state.d[c]={v:0,first:"",visits:1,days:"",mode:"",cities:"",food:"",rating:0,note:"",hl:[],extra:[],photos:[]}; return state.d[c]; }
+const MODES=["Flug","Auto","Zug","Bus","Schiff","Fahrrad","zu Fuß"];
+const MAXFOTOS=6;
+const LGNAME={de:"Deutsch",en:"Englisch",fr:"Französisch",es:"Spanisch",pt:"Portugiesisch",it:"Italienisch",nl:"Niederländisch",
+ da:"Dänisch",sv:"Schwedisch",no:"Norwegisch",fi:"Finnisch",is:"Isländisch",pl:"Polnisch",cs:"Tschechisch",sk:"Slowakisch",
+ hu:"Ungarisch",sl:"Slowenisch",hr:"Kroatisch",bs:"Bosnisch",sr:"Serbisch",sq:"Albanisch",mk:"Mazedonisch",el:"Griechisch",
+ bg:"Bulgarisch",ro:"Rumänisch",uk:"Ukrainisch",be:"Belarussisch",ru:"Russisch",et:"Estnisch",lv:"Lettisch",lt:"Litauisch",
+ tr:"Türkisch",mt:"Maltesisch",ca:"Katalanisch",ja:"Japanisch",ko:"Koreanisch",zh:"Chinesisch",mn:"Mongolisch",th:"Thai",
+ vi:"Vietnamesisch",km:"Khmer",lo:"Laotisch",my:"Birmanisch",ms:"Malaiisch",id:"Indonesisch",hi:"Hindi",ur:"Urdu",bn:"Bengalisch",
+ ne:"Nepali",dz:"Dzongkha",si:"Singhalesisch",ta:"Tamil",dv:"Dhivehi",ps:"Paschtu",fa:"Persisch",ar:"Arabisch",he:"Hebräisch",
+ ka:"Georgisch",hy:"Armenisch",az:"Aserbaidschanisch",kk:"Kasachisch",uz:"Usbekisch",tk:"Turkmenisch",ky:"Kirgisisch",tg:"Tadschikisch",
+ sw:"Swahili",am:"Amharisch",ti:"Tigrinya",so:"Somali",rw:"Kinyarwanda",rn:"Kirundi",ny:"Chichewa",sn:"Shona",tn:"Setswana",
+ st:"Sesotho",ss:"Siswati",af:"Afrikaans",mg:"Malagasy",sg:"Sango",ht:"Kreol",gn:"Guaraní",mi:"Māori",fj:"Fidschi",bi:"Bislama",
+ sm:"Samoanisch",to:"Tongaisch",tvl:"Tuvaluisch",na:"Nauruisch",mh:"Marshallesisch"};
+function ensure(c){if(!state.d[c])state.d[c]={v:0,first:"",visits:1,days:"",modes:[],cities:"",food:"",rating:0,note:"",hl:[],extra:[],photos:[]};
+  const r=state.d[c]; r.modes=r.modes||[]; r.hl=r.hl||[]; r.extra=r.extra||[]; r.photos=r.photos||[]; return r;}
+const esc=s=>String(s).replace(/"/g,"&quot;");
 
 function openSheet(c){
-  openCode=c; const x=byCode(c), r=ensure(c);
-  const host=document.getElementById("sheetHost");
+  openCode=c; const x=byCode(c),r=ensure(c);
+  const eigen=(state.custom||[]).some(z=>z.c===c);
   const tier=x.t===3?"legendär":x.t===2?"selten":"häufig";
-  const hlAll=(x.h||[]).map(t=>({t,own:0})).concat((r.extra||[]).map(t=>({t,own:1})));
-  host.innerHTML=`<div class="sheet" id="sheet"><div class="page">
-    <div class="page-hd">
-      <div class="flag">${x.f}</div>
+  const hlAll=(x.h||[]).map(t=>({t,own:0})).concat(r.extra.map(t=>({t,own:1})));
+  const lgs=(x.lg||[]).map(l=>LGNAME[l]||l).join(", ");
+  document.getElementById("sheetHost").innerHTML=`<div class="sheet" id="sheet"><div class="page">
+    <div class="page-hd"><div class="flag">${x.f}</div>
       <div><h2>${x.n}</h2><div class="meta">${x.c} · ${x.k} · ${tier}</div></div>
-      <button class="close" data-act="close" aria-label="Schließen">✕</button>
-    </div>
+      <button class="close" data-act="close" aria-label="Schließen">✕</button></div>
+
+    ${x.cap?`<div class="sec"><h3>Land</h3><div class="facts">
+      <div><div class="k">Hauptstadt</div><div class="v">${x.cap}</div></div>
+      <div><div class="k">Einwohner</div><div class="v">${nf(x.pop)}</div></div>
+      <div><div class="k">Amtssprache</div><div class="v">${lgs||"—"}</div></div>
+      <div><div class="k">Besonderheit</div><div class="v">${[x.i?"Inselstaat":"",x.s?"Südhalbkugel":"",x.arc?"Polarkreis":""].filter(Boolean).join(" · ")||"—"}</div></div>
+    </div><div class="hint">Einwohnerzahlen gerundet.</div></div>`:""}
 
     <div class="sec">
-      <div class="visit-row"><button class="bigbtn${r.v?" on":""}" data-act="toggle">${r.v?"Besucht — Stempel entfernen":"Stempel setzen"}</button></div>
+      <button class="bigbtn${r.v?" on":""}" data-act="toggle">${r.v?"Besucht — Stempel entfernen":"Stempel setzen"}</button>
       <div class="hint">Zählt erst mit mindestens einer Übernachtung. Umsteigen am Flughafen zählt nicht.</div>
     </div>
 
@@ -594,60 +773,67 @@ function openSheet(c){
       <div class="frm">
         <label><span class="lb">Erster Besuch</span><input type="date" data-k="first" value="${r.first||""}"></label>
         <label><span class="lb">Anzahl Besuche</span><input type="number" min="1" max="99" data-k="visits" value="${r.visits||1}"></label>
-        <label><span class="lb">Längster Aufenthalt (Tage)</span><input type="number" min="0" max="999" data-k="days" value="${r.days||""}"></label>
-        <label><span class="lb">Angereist per</span><select data-k="mode">${MODES.map(m=>`<option value="${m}"${r.mode===m?" selected":""}>${m||"—"}</option>`).join("")}</select></label>
-        <label class="wide"><span class="lb">Städte / Orte</span><input data-k="cities" value="${(r.cities||"").replace(/"/g,"&quot;")}" placeholder="Kotor, Žabljak, …"></label>
-        <label class="wide"><span class="lb">Bestes Essen</span><input data-k="food" value="${(r.food||"").replace(/"/g,"&quot;")}" placeholder="Was du wieder essen würdest"></label>
-        <div class="wide"><span class="lb">Bewertung</span>
-          <div class="stars">${[1,2,3,4,5].map(i=>`<button data-star="${i}" class="${(r.rating||0)>=i?"on":""}" aria-label="${i} von 5">★</button>`).join("")}</div>
-        </div>
+        <label class="wide"><span class="lb">Längster Aufenthalt (Tage)</span><input type="number" min="0" max="999" data-k="days" value="${r.days||""}"></label>
+        <div class="wide"><span class="lb">Angereist per — mehrfach möglich</span>
+          <div class="modes">${MODES.map(m=>`<button data-mode="${m}" class="${r.modes.includes(m)?"on":""}">${m}</button>`).join("")}</div></div>
+        <label class="wide"><span class="lb">Städte / Orte</span><input data-k="cities" value="${esc(r.cities||"")}" placeholder="Kotor, Žabljak, …"></label>
+        <label class="wide"><span class="lb">Bestes Essen</span><input data-k="food" value="${esc(r.food||"")}" placeholder="Was du wieder essen würdest"></label>
+        <div class="wide"><span class="lb">Bewertung</span><div class="stars">${[1,2,3,4,5].map(i=>`<button data-star="${i}" class="${(r.rating||0)>=i?"on":""}" aria-label="${i} von 5">★</button>`).join("")}</div></div>
         <label class="wide"><span class="lb">Erinnerung</span><textarea data-k="note" placeholder="Ein Satz, den du in zehn Jahren lesen willst.">${r.note||""}</textarea></label>
       </div>
     </div>
 
     <div class="sec" ${r.v?"":'style="opacity:.45;pointer-events:none"'}>
       <h3>Ziele im Land · ${doneCount(c)}/${hlAll.length}</h3>
-      ${hlAll.map(o=>{const on=(r.hl||[]).includes(o.t);return `<div class="hl${on?" done":""}">
-        <button class="box${on?" on":""}" data-hl="${o.t.replace(/"/g,"&quot;")}">${on?"✓":""}</button>
-        <span class="tx">${o.t}</span>
-        ${o.own?`<button class="del" data-delhl="${o.t.replace(/"/g,"&quot;")}" aria-label="Entfernen">✕</button>`:""}
-      </div>`}).join("")}
+      ${hlAll.map(o=>{const on=r.hl.includes(o.t);return `<div class="hl${on?" done":""}">
+        <button class="box${on?" on":""}" data-hl="${esc(o.t)}">${on?"✓":""}</button><span class="tx">${o.t}</span>
+        ${o.own?`<button class="del" data-delhl="${esc(o.t)}" aria-label="Entfernen">✕</button>`:""}</div>`}).join("")}
       <div class="addhl"><input id="newHl" placeholder="Eigenes Ziel ergänzen" maxlength="60"><button data-act="addhl">Hinzufügen</button></div>
     </div>
 
     <div class="sec" ${r.v?"":'style="opacity:.45;pointer-events:none"'}>
-      <h3>Belege · ${(r.photos||[]).length}/3</h3>
+      <h3>Belege · ${r.photos.length}/${MAXFOTOS}</h3>
       <div class="photos">
-        ${[0,1,2].map(i=>{const p=(r.photos||[])[i];
-          return p?`<div class="slot"><img src="${p}" alt=""><button class="rm" data-rm="${i}">✕</button></div>`
-                  :`<button class="slot" data-add="${i}">+ Foto</button>`}).join("")}
+        ${r.photos.map((p,i)=>`<div class="slot"><img src="${p}" alt=""><button class="rm" data-rm="${i}">✕</button></div>`).join("")}
+        ${r.photos.length<MAXFOTOS?`<button class="slot" data-add="1">+ Fotos</button>`:""}
       </div>
-      <div class="hint">Fotos werden beim Einfügen verkleinert und liegen nur auf diesem Gerät.</div>
+      <div class="hint">Mehrere Bilder auf einmal möglich. Sie werden verkleinert und bleiben auf diesem Gerät.</div>
     </div>
 
-    <div class="sec" style="border:0;text-align:right">
-      <button class="smallbtn" data-act="close">Schließen</button>
+    ${eigen?`<div class="sec"><h3>Eigener Eintrag</h3><div class="frm">
+      <label class="wide"><span class="lb">Name</span><input data-c="n" value="${esc(x.n)}"></label>
+      <label><span class="lb">Flagge oder Symbol</span><input data-c="f" value="${x.f}" maxlength="4"></label>
+      <label><span class="lb">Stempelmotiv</span><input data-c="m" value="${x.m||""}" maxlength="4" placeholder="z. B. 🌋"></label>
+      <label><span class="lb">Kontinent</span><select data-c="k">${KONT.map(k=>`<option${x.k===k?" selected":""}>${k}</option>`).join("")}</select></label>
+      <label><span class="lb">Seltenheit</span><select data-c="t">${[[1,"häufig"],[2,"selten"],[3,"legendär"]].map(o=>`<option value="${o[0]}"${x.t==o[0]?" selected":""}>${o[1]}</option>`).join("")}</select></label>
     </div>
+    <div class="rowbtns"><button class="smallbtn danger" data-act="delcountry">Dieses Land löschen</button></div></div>`:""}
+
+    <div class="sec" style="border:0;text-align:right"><button class="smallbtn" data-act="close">Schließen</button></div>
   </div></div>`;
-  document.body.style.overflow="hidden";
-  bindSheet();
+  document.body.style.overflow="hidden"; bindSheet();
 }
 function prune(c){
   const r=state.d[c]; if(!r)return;
-  const leer=!r.v&&!r.note&&!r.cities&&!r.food&&!r.rating&&!(r.hl||[]).length&&!(r.extra||[]).length&&!(r.photos||[]).length;
-  if(leer){delete state.d[c];save();}
+  if(!r.v&&!r.note&&!r.cities&&!r.food&&!r.rating&&!r.hl.length&&!r.extra.length&&!r.photos.length){delete state.d[c];save();}
 }
 function closeSheet(){prune(openCode);document.getElementById("sheetHost").innerHTML="";document.body.style.overflow="";openCode=null;render();}
 
-function shrink(file,cb){
+function shrink(file,max,q,cb){
   const fr=new FileReader();
   fr.onload=e=>{const img=new Image();
-    img.onload=()=>{const M=900,s=Math.min(1,M/Math.max(img.width,img.height));
+    img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));
       const cv=document.createElement("canvas");cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);
-      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",.6));};
-    img.onerror=()=>toast("Bild konnte nicht gelesen werden.");
-    img.src=e.target.result;};
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",q));};
+    img.onerror=()=>toast("Bild konnte nicht gelesen werden.");img.src=e.target.result;};
   fr.readAsDataURL(file);
+}
+function pickPhotos(multi,max,q,done){
+  const f=document.createElement("input");f.type="file";f.accept="image/*";if(multi)f.multiple=true;
+  f.onchange=()=>{const files=[...f.files];if(!files.length)return;
+    let left=files.length,out=[];
+    files.forEach(file=>shrink(file,max,q,url=>{out.push(url);if(!--left)done(out);}));};
+  f.click();
 }
 
 function bindSheet(){
@@ -657,114 +843,124 @@ function bindSheet(){
     const b=e.target.closest("button"); if(!b)return;
     const r=ensure(openCode);
     if(b.dataset.act==="close"){closeSheet();return;}
+    if(b.dataset.act==="delcountry"){
+      if(!confirm("„"+byCode(openCode).n+"“ mit allen Einträgen löschen?"))return;
+      state.custom=(state.custom||[]).filter(z=>z.c!==openCode);delete state.d[openCode];save();
+      document.getElementById("sheetHost").innerHTML="";document.body.style.overflow="";openCode=null;render();toast("Land gelöscht.");return;}
     if(b.dataset.act==="toggle"){
-      r.v=r.v?0:1;
-      if(r.v&&!r.first)r.first=new Date().toISOString().slice(0,10);
-      if(r.v)justStamped=openCode;
-      save(); openSheet(openCode); renderPass(); return;
-    }
+      r.v=r.v?0:1; if(r.v&&!r.first)r.first=new Date().toISOString().slice(0,10);
+      if(r.v)justStamped=openCode; save();openSheet(openCode);renderPass();return;}
+    if(b.dataset.mode){
+      const m=b.dataset.mode,i=r.modes.indexOf(m); i>-1?r.modes.splice(i,1):r.modes.push(m);
+      save();openSheet(openCode);renderPass();return;}
     if(b.dataset.star){r.rating=(+b.dataset.star===r.rating)?0:+b.dataset.star;save();openSheet(openCode);return;}
-    if(b.dataset.hl!==undefined){
-      const t=b.dataset.hl; r.hl=r.hl||[];
-      const i=r.hl.indexOf(t); i>-1?r.hl.splice(i,1):r.hl.push(t);
-      save(); openSheet(openCode); renderPass(); return;
-    }
-    if(b.dataset.delhl!==undefined){
-      const t=b.dataset.delhl;
-      r.extra=(r.extra||[]).filter(z=>z!==t); r.hl=(r.hl||[]).filter(z=>z!==t);
-      save(); openSheet(openCode); return;
-    }
-    if(b.dataset.act==="addhl"){
-      const inp=document.getElementById("newHl"), t=inp.value.trim();
-      if(!t){inp.focus();return;}
-      r.extra=r.extra||[]; if(!r.extra.includes(t))r.extra.push(t);
-      save(); openSheet(openCode); return;
-    }
-    if(b.dataset.rm!==undefined){
-      r.photos.splice(+b.dataset.rm,1); save(); openSheet(openCode); return;
-    }
+    if(b.dataset.hl!==undefined){const t=b.dataset.hl,i=r.hl.indexOf(t);
+      i>-1?r.hl.splice(i,1):r.hl.push(t);save();openSheet(openCode);renderPass();return;}
+    if(b.dataset.delhl!==undefined){const t=b.dataset.delhl;
+      r.extra=r.extra.filter(z=>z!==t);r.hl=r.hl.filter(z=>z!==t);save();openSheet(openCode);return;}
+    if(b.dataset.act==="addhl"){const inp=document.getElementById("newHl"),t=inp.value.trim();
+      if(!t){inp.focus();return;} if(!r.extra.includes(t))r.extra.push(t);save();openSheet(openCode);return;}
+    if(b.dataset.rm!==undefined){r.photos.splice(+b.dataset.rm,1);save();openSheet(openCode);return;}
     if(b.dataset.add!==undefined){
-      const f=document.createElement("input"); f.type="file"; f.accept="image/*";
-      f.onchange=()=>{if(!f.files[0])return;
-        shrink(f.files[0],url=>{r.photos=r.photos||[];r.photos.push(url);save();openSheet(openCode);});};
-      f.click(); return;
-    }
+      pickPhotos(true,900,.6,urls=>{
+        const frei=MAXFOTOS-r.photos.length;
+        if(urls.length>frei)toast("Nur "+frei+" Bild(er) passen noch rein.");
+        r.photos.push(...urls.slice(0,frei));save();openSheet(openCode);});
+      return;}
   });
   const onEdit=e=>{
+    const ck=e.target.dataset.c;
+    if(ck){const obj=(state.custom||[]).find(z=>z.c===openCode);if(!obj)return;
+      obj[ck]=ck==="t"?+e.target.value:(e.target.value.trim()||(ck==="f"?"🏳️":obj[ck]));save();return;}
     const k=e.target.dataset.k; if(!k)return;
     ensure(openCode)[k]=e.target.value; save(); renderPass();
   };
-  sh.addEventListener("change",onEdit);
-  sh.addEventListener("input",onEdit);
+  sh.addEventListener("change",onEdit); sh.addEventListener("input",onEdit);
 }
 
 /* ====== Events ====== */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   tab=b.dataset.tab;
   document.querySelectorAll(".tabs button").forEach(z=>z.setAttribute("aria-selected",z===b));
-  ["dex","book","ach","data"].forEach(t=>document.getElementById("tab-"+t).hidden=(t!==tab));
+  ["dex","book","ach","prof","data"].forEach(t=>document.getElementById("tab-"+t).hidden=(t!==tab));
   render(); window.scrollTo(0,0);
 }));
-document.getElementById("grid").addEventListener("click",e=>{
-  const c=e.target.closest(".card"); if(c)openSheet(c.dataset.code);
+document.getElementById("grid").addEventListener("click",e=>{if(GUEST)return;const c=e.target.closest(".card");if(c)openSheet(c.dataset.code);});
+document.getElementById("book").addEventListener("click",e=>{if(GUEST)return;const c=e.target.closest(".bigstamp");if(c)openSheet(c.dataset.code);});
+document.getElementById("profBody").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  if(b.dataset.flair!==undefined){state.flair=b.dataset.flair;save();renderProf();renderPass();return;}
+  if(b.id==="setPhoto"){pickPhotos(false,420,.7,u=>{state.photo=u[0];save();renderProf();renderPass();});return;}
+  if(b.id==="delPhoto"){state.photo="";save();renderProf();renderPass();return;}
 });
-document.getElementById("book").addEventListener("click",e=>{
-  const c=e.target.closest(".bigstamp"); if(c)openSheet(c.dataset.code);
-});
+document.getElementById("passPhoto").addEventListener("click",()=>GUEST||pickPhotos(false,420,.7,u=>{state.photo=u[0];save();renderPass();}));
 document.getElementById("search").addEventListener("input",e=>{q=e.target.value.trim().toLowerCase();renderDex();});
 document.querySelectorAll('.filters [data-f]').forEach(b=>b.addEventListener("click",()=>{
-  filter=b.dataset.f;
-  document.querySelectorAll('.filters [data-f]').forEach(z=>z.setAttribute("aria-pressed",z===b));
-  renderDex();
-}));
+  filter=b.dataset.f;document.querySelectorAll('.filters [data-f]').forEach(z=>z.setAttribute("aria-pressed",z===b));renderDex();}));
 document.getElementById("contFilters").addEventListener("click",e=>{
   const b=e.target.closest("[data-k]"); if(!b)return;
-  kfilter=b.dataset.k;
-  document.querySelectorAll("#contFilters [data-k]").forEach(z=>z.setAttribute("aria-pressed",z===b));
-  renderDex();
-});
+  kfilter=b.dataset.k;document.querySelectorAll("#contFilters [data-k]").forEach(z=>z.setAttribute("aria-pressed",z===b));renderDex();});
 document.getElementById("nameIn").addEventListener("input",e=>{state.name=e.target.value;save();renderPass();});
 document.getElementById("addCountry").addEventListener("click",()=>{
-  const n=prompt("Name des Landes?"); if(!n)return;
-  let c=(prompt("Kürzel, 2–3 Buchstaben?","")||n.slice(0,2)).toUpperCase().slice(0,3);
-  if(byCode(c)){toast("Kürzel gibt es schon.");return;}
-  const k=prompt("Kontinent? "+KONT.join(" / "),"Europa")||"Europa";
-  state.custom.push({c,n,f:"🏳️",k:KONT.includes(k)?k:"Europa",t:2,h:[]});
-  save(); renderDex(); openSheet(c);
-});
+  const n=(prompt("Name des Landes oder Gebiets?")||"").trim(); if(!n)return;
+  const base=(n.toUpperCase().replace(/[^A-Z]/g,"")||"XX").slice(0,2);
+  let c=base,i=1; while(byCode(c)){c=base+i;i++;}
+  state.custom.push({c,n,f:"🏳️",k:"Europa",t:2,pop:0,cap:"",lg:[],h:[]});
+  save();renderDex();openSheet(c);});
 document.getElementById("expBtn").addEventListener("click",()=>{
-  const b=new Blob([JSON.stringify(state,null,1)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(b); a.download="reisepass-"+new Date().toISOString().slice(0,10)+".json";
-  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  const b=new Blob([JSON.stringify(state,null,1)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="reisepass-"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+document.getElementById("shareBtn").addEventListener("click",()=>{
+  if(!visited().length){toast("Noch keine Stempel zum Teilen.");return;}
+  const url=location.origin+location.pathname+"#p="+encodeShare();
+  const out=document.getElementById("shareOut");
+  out.hidden=false; out.value=url; out.focus(); out.select();
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(()=>toast("Link kopiert.")).catch(()=>toast("Link markiert — jetzt kopieren."));
+  else toast("Link markiert — jetzt kopieren.");
 });
 document.getElementById("impBtn").addEventListener("click",()=>document.getElementById("impFile").click());
 document.getElementById("impFile").addEventListener("change",e=>{
-  const f=e.target.files[0]; if(!f)return;
-  const fr=new FileReader();
-  fr.onload=()=>{try{
-      const o=JSON.parse(fr.result);
-      if(!o||typeof o!=="object"||!o.d)throw 0;
-      state=Object.assign({name:"",custom:[],d:{}},o);
-      save(); render(); toast("Daten geladen.");
-    }catch(err){toast("Datei passt nicht. Bitte eine Export-Datei wählen.");}};
-  fr.readAsText(f); e.target.value="";
-});
+  const f=e.target.files[0]; if(!f)return; const fr=new FileReader();
+  fr.onload=()=>{try{const o=JSON.parse(fr.result); if(!o||typeof o!=="object"||!o.d)throw 0;
+      state=Object.assign({name:"",photo:"",flair:"",custom:[],d:{}},o);migrate();save();
+      document.getElementById("nameIn").value=state.name||"";render();toast("Daten geladen.");}
+    catch(err){toast("Datei passt nicht. Bitte eine Export-Datei wählen.");}};
+  fr.readAsText(f);e.target.value="";});
 document.getElementById("resetBtn").addEventListener("click",()=>{
   if(!confirm("Alle Länder, Notizen und Fotos löschen? Das lässt sich nicht rückgängig machen."))return;
-  state={name:"",custom:[],d:{}}; save(); document.getElementById("nameIn").value=""; render(); toast("Alles gelöscht.");
-});
+  state={name:"",photo:"",flair:"",custom:[],d:{}};save();document.getElementById("nameIn").value="";render();toast("Alles gelöscht.");});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openCode)closeSheet();});
 
-/* ====== App-Installation ====== */
-if("serviceWorker" in navigator && location.protocol==="https:"){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
-}
 /* ====== Start ====== */
+if("serviceWorker" in navigator && location.protocol==="https:")
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 load();
 try{localStorage.setItem(KEY+".t","1");localStorage.removeItem(KEY+".t");}catch(e){memOnly=true;}
+
+const m=location.hash.match(/^#p=(.+)$/);
+if(m){
+  const g=decodeShare(m[1]);
+  if(g&&Object.keys(g.d).length){
+    GUEST=true; gMask=g.mask;
+    state={name:g.name,photo:"",flair:g.flair,custom:[],d:g.d};
+    const wer=(g.name||"Reisende:r").trim();
+    document.getElementById("guestBar").innerHTML=
+      '<div class="warn" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">'+
+      '<span>Du siehst den Pass von <b>'+wer.replace(/[<>&]/g,"")+'</b> — nur zum Anschauen.</span>'+
+      '<button class="smallbtn" id="ownPass">Eigenen Pass öffnen</button></div>';
+    document.getElementById("ownPass").addEventListener("click",()=>{location.href=location.pathname;});
+    document.querySelector('.tabs [data-tab="data"]').hidden=true;
+    document.getElementById("addCountry").hidden=true;
+    document.getElementById("nameIn").readOnly=true;
+    document.querySelector('.tabs [data-tab="prof"]').click();
+  }else{
+    toast("Dieser Link lässt sich nicht lesen.");
+  }
+}
 document.getElementById("nameIn").value=state.name||"";
-render();
+if(!GUEST) render();
 </script>
 </body>
 </html>
