@@ -138,13 +138,23 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .slot img{width:100%;height:100%;object-fit:cover;display:block}
 .slot .rm{position:absolute;right:3px;top:3px;background:rgba(243,240,231,.9);border:1px solid var(--line);border-radius:2px;font-size:11px;line-height:1;padding:2px 5px}
 
-.ach{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:2px;background:var(--paper3);margin-bottom:7px}
+.ach{width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:2px;background:var(--paper3);margin-bottom:7px}
 .ach.locked{border-style:dashed;background:transparent;opacity:.55}
 .ach .ic{font-size:20px;line-height:1;filter:grayscale(1)}
 .ach:not(.locked) .ic{filter:none}
 .ach .t{font-family:var(--display);font-size:13.5px;letter-spacing:.05em}
 .ach .d{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .ach .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink-soft);margin-top:4px}
+.ach .chev{color:var(--ink-soft);font-size:18px;align-self:center;opacity:.6}
+.pips{display:flex;gap:4px;margin-top:6px}
+.pip{width:16px;height:4px;border-radius:2px;background:rgba(22,50,63,.15)}
+.pip.on{background:var(--stamp)}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
+.setitem{display:flex;gap:7px;align-items:center;font-size:13px;color:var(--ink-soft);padding:3px 0;min-width:0}
+.setitem span:last-of-type{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setitem b{font-family:var(--mono);opacity:.5}
+.setitem.on{color:var(--ink)}
+.setitem.on b{color:var(--stamp);opacity:1}
 
 .book{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
 .bigstamp{position:relative;aspect-ratio:1/1;border:2.5px solid var(--c);color:var(--c);background:transparent;
@@ -234,13 +244,17 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
       <div class="rowbtns"><button class="smallbtn" id="addCountry">+ Eigenes Land</button></div>
     </section>
     <section id="tab-book" hidden><div class="stats" id="bookStats"></div><div class="book" id="book"></div></section>
-    <section id="tab-ach" hidden><div id="achList"></div></section>
+    <section id="tab-ach" hidden>
+      <div class="filters" id="achFilters"></div>
+      <div class="filters" id="achKat"></div>
+      <div id="achList"></div>
+    </section>
     <section id="tab-prof" hidden><div id="profBody"></div></section>
     <section id="tab-data" hidden>
       <div id="storeWarn"></div>
       <div class="panel">
         <h3>Pass teilen</h3>
-        <p class="note">Erzeugt einen Link mit deinen Stempeln, Orden und deiner Stufe. Wer ihn öffnet, sieht deinen Pass nur zum Anschauen. Notizen, Städte, Essen und Fotos bleiben draußen.</p>
+        <p class="note">Erzeugt einen Link mit deinen Stempeln, Orden, Bewertungen und deiner längsten Reise. Wer ihn öffnet, sieht deinen Pass nur zum Anschauen. Notizen, Städte, Essen, Anreisearten, Fotos und Passfoto bleiben draußen.</p>
         <div class="rowbtns" style="margin-bottom:6px"><button class="smallbtn" id="shareBtn">Link erzeugen</button></div>
         <input id="shareOut" readonly hidden style="width:100%;background:var(--paper2);border:1px solid var(--line);border-radius:2px;padding:8px;font-family:var(--mono);font-size:11px">
       </div>
@@ -471,6 +485,7 @@ const MAGELLAN=["ES","BR","AR","CL","PH","BN","ID","TL","CV"];
 const KONT_MOTIV={Europa:"🏰",Asien:"🏯",Afrika:"🦁",Nordamerika:"🌄",Südamerika:"⛰️",Ozeanien:"🏝️"};
 
 /* ====== Teilen ====== */
+const SLOTZAHL=200;
 let GUEST=false;
 const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 function toB64(bytes){let o="";for(let i=0;i<bytes.length;i+=3){
@@ -485,10 +500,10 @@ function fromB64(str){const out=[];let buf=0,bits=0;
 function encodeShare(){
   const enc=new TextEncoder(), out=[];
   const put=(arr)=>{out.push(arr.length&255);for(const b of arr)out.push(b);};
-  out.push(1);
+  out.push(2);
   put(enc.encode((state.name||"").slice(0,40)));
   put(enc.encode((state.flair||"").slice(0,40)));
-  const a=achs(), mask=new Uint8Array(Math.ceil(ACHDEF.length/8));
+  const a=achs(), mask=new Uint8Array(Math.ceil(SLOTZAHL/8));
   a.forEach((z,i)=>{if(z.ok)mask[i>>3]|=1<<(i&7);});
   mask.forEach(b=>out.push(b));
   const v=visited().filter(x=>x.c.length===2&&BASE.some(z=>z.c===x.c));
@@ -497,22 +512,22 @@ function encodeShare(){
     out.push(x.c.charCodeAt(0),x.c.charCodeAt(1));
     const y=r.first?parseInt(r.first.slice(0,4),10)-1900:0;
     const mo=r.first?parseInt(r.first.slice(5,7),10)||0:0;
-    out.push(y>0&&y<256?y:0, mo, Math.min(5,r.rating||0), Math.min(255,(r.hl||[]).length));});
+    out.push(y>0&&y<256?y:0, mo, Math.min(5,r.rating||0), Math.min(255,(r.hl||[]).length), Math.min(255,+r.days||0));});
   return toB64(Uint8Array.from(out));
 }
 function decodeShare(str){
   try{
-    const b=fromB64(str); let i=0; if(b[i++]!==1) return null;
+    const b=fromB64(str); let i=0; if(b[i++]!==2) return null;
     const dec=new TextDecoder();
     const rd=()=>{const n=b[i++],s=dec.decode(b.slice(i,i+n));i+=n;return s;};
     const name=rd(), flair=rd();
-    const mb=Math.ceil(ACHDEF.length/8), mask=b.slice(i,i+mb); i+=mb;
+    const mb=Math.ceil(SLOTZAHL/8), mask=b.slice(i,i+mb); i+=mb;
     const cnt=(b[i]<<8)|b[i+1]; i+=2;
     const d={};
     for(let k=0;k<cnt;k++){
       const code=String.fromCharCode(b[i],b[i+1]); i+=2;
-      const y=b[i++], mo=b[i++], rating=b[i++], hln=b[i++];
-      d[code]={v:1,first:y?(1900+y)+"-"+String(mo||1).padStart(2,"0")+"-01":"",visits:1,days:"",modes:[],cities:"",food:"",
+      const y=b[i++], mo=b[i++], rating=b[i++], hln=b[i++], days=b[i++];
+      d[code]={v:1,first:y?(1900+y)+"-"+String(mo||1).padStart(2,"0")+"-01":"",visits:1,days:days||"",modes:[],cities:"",food:"",
                rating,note:"",hl:Array(hln).fill("·"),extra:[],photos:[]};
     }
     return {name,flair,d,mask};
@@ -551,54 +566,135 @@ const totalHl=()=>all().reduce((s,x)=>s+doneCount(x.c),0);
 const contSet=()=>new Set(visited().map(x=>x.k));
 const photoCount=()=>Object.values(state.d).reduce((s,r)=>s+((r.photos||[]).length),0);
 const hasMode=m=>visited().filter(x=>(rec(x.c).modes||[]).includes(m)).length;
-const xpLaender=()=>visited().reduce((s,x)=>s+10*(x.t||1),0);
-const xpZiele=()=>3*totalHl();
+const xpLaender=()=>visited().reduce((s,x)=>s+10*(istEigen(x.c)?1:(x.t||1)),0);
+const istEigen=c=>(state.custom||[]).some(z=>z.c===c);
+const xpZiele=()=>3*all().reduce((sum,x)=>{
+  const r=rec(x.c); if(!r||!r.v||!r.hl) return sum;
+  const basis=x.h||[];
+  const b=r.hl.filter(t=>basis.includes(t)).length;
+  const e=r.hl.filter(t=>!basis.includes(t)).length;
+  return sum+b+Math.min(e,Math.max(4,basis.length));
+},0);
 const xpOrden=()=>15*achs().filter(a=>a.ok).length;
 const xp=()=>xpLaender()+xpZiele()+xpOrden();
 const STUFE=80;
 
-const ACHDEF=[
- {id:"first",ic:"🛂",t:"Erster Stempel",d:"Ein Land mit Übernachtung",fl:"Erstreisende:r",f:()=>[visited().length,1]},
- {id:"ten",ic:"✈️",t:"Zehnerclub",d:"10 Länder",f:()=>[visited().length,10]},
- {id:"twenty",ic:"🌎",t:"Zwanzig",d:"20 Länder",fl:"Vielgereiste:r",f:()=>[visited().length,20]},
- {id:"fifty",ic:"🌐",t:"Halbes Hundert",d:"50 Länder",fl:"Weltensammler:in",f:()=>[visited().length,50]},
- {id:"k2",ic:"🗺️",t:"Kontinentsprung",d:"2 Kontinente",f:()=>[contSet().size,2]},
- {id:"k4",ic:"🧭",t:"Weltenbummler",d:"4 Kontinente",fl:"Kontinentsammler:in",f:()=>[contSet().size,4]},
- {id:"k6",ic:"🏆",t:"Alle Kontinente",d:"6 von 6",fl:"Erdumspanner:in",f:()=>[contSet().size,6]},
- {id:"isle",ic:"🏝️",t:"Inselstaat",d:"Ein Inselstaat besucht",fl:"Inselhüpfer:in",f:()=>[visited().filter(x=>x.i).length,1]},
- {id:"arc",ic:"❄️",t:"Polarkreis",d:"Land mit Gebiet nördlich des Polarkreises",fl:"Polarfahrer:in",f:()=>[visited().filter(x=>x.arc).length,1]},
- {id:"south",ic:"☀️",t:"Südhalbkugel",d:"Land südlich des Äquators",f:()=>[visited().filter(x=>x.s).length,1]},
- {id:"car",ic:"🚗",t:"Mit dem Auto",d:"Ein Land per Auto erreicht",f:()=>[hasMode("Auto"),1]},
- {id:"train1",ic:"🚆",t:"Mit dem Zug",d:"Ein Land per Zug erreicht",f:()=>[hasMode("Zug"),1]},
- {id:"train5",ic:"🛤️",t:"Schienennetz",d:"5 Länder per Zug erreicht",fl:"Schienenreisende:r",f:()=>[hasMode("Zug"),5]},
- {id:"ship",ic:"⛴️",t:"Über Wasser",d:"Ein Land per Schiff erreicht",f:()=>[hasMode("Schiff"),1]},
- {id:"noplane",ic:"🌱",t:"Landratte",d:"8 Länder ohne Flug erreicht",fl:"Landratte",
-   f:()=>[visited().filter(x=>{const m=rec(x.c).modes||[];return m.length&&!m.includes("Flug")}).length,8]},
- {id:"nb",ic:"📍",t:"Nachbarschaft",d:"Alle 9 Nachbarländer Deutschlands",fl:"Grenzgänger:in",
-   f:()=>[NACHBARN.filter(c=>rec(c)&&rec(c).v).length,9]},
- {id:"small",ic:"🔬",t:"Kleinstaaten-Kenner",d:"5 Länder mit weniger als 1 Mio. Einwohnern",fl:"Kleinstaaten-Kenner:in",
-   f:()=>[visited().filter(x=>x.pop<1).length,5]},
- {id:"big5",ic:"🐘",t:"Die Großen Fünf",d:"Die fünf bevölkerungsreichsten Länder der Erde",fl:"Milliardenreisende:r",
-   f:()=>{const top=BASE.slice().sort((a,b)=>b.pop-a.pop).slice(0,5).map(x=>x.c);
-          return [top.filter(c=>rec(c)&&rec(c).v).length,5]}},
- {id:"magellan",ic:"⛵",t:"Auf Magellans Route",d:"Alle 9 Länder der ersten Weltumsegelung 1519–1522",fl:"Weltumsegler:in",
-   f:()=>[MAGELLAN.filter(c=>rec(c)&&rec(c).v).length,MAGELLAN.length]},
- {id:"es3",ic:"🇪🇸",t:"Spanisch für Anfänger",d:"3 Länder mit Spanisch als Amtssprache",
-   f:()=>[visited().filter(x=>(x.lg||[]).includes("es")).length,3]},
- {id:"es8",ic:"📚",t:"Spanisch für Fortgeschrittene",d:"8 Länder mit Spanisch als Amtssprache",fl:"Hispanist:in",
-   f:()=>[visited().filter(x=>(x.lg||[]).includes("es")).length,8]},
- {id:"hl25",ic:"🎯",t:"Sammler",d:"25 Ziele im Land abgehakt",f:()=>[totalHl(),25]},
- {id:"again",ic:"🔁",t:"Wiederholungstäter",d:"Ein Land 3× besucht",fl:"Stammgast",f:()=>[Math.max(0,...visited().map(x=>rec(x.c).visits||1)),3]},
- {id:"long",ic:"⏳",t:"Langstrecke",d:"14 Tage am Stück in einem Land",fl:"Langstreckler:in",f:()=>[Math.max(0,...visited().map(x=>+rec(x.c).days||0)),14]},
- {id:"leg",ic:"💎",t:"Legendär",d:"Ein Land der Stufe legendär",fl:"Legendenjäger:in",f:()=>[visited().filter(x=>x.t===3).length,1]},
- {id:"photo",ic:"📸",t:"Bildband",d:"10 Fotos eingeklebt",fl:"Chronist:in",f:()=>[photoCount(),10]},
- {id:"five",ic:"⭐",t:"Bestnote",d:"Ein Land mit 5 Sternen",f:()=>[visited().filter(x=>(rec(x.c).rating||0)===5).length,1]}
+const SETS={
+ NACHBARN:["DK","PL","CZ","AT","CH","FR","LU","BE","NL"],
+ MAGELLAN:["ES","BR","AR","CL","PH","BN","ID","TL","CV"],
+ EQUATOR:["EC","CO","BR","ST","GA","CG","CD","UG","KE","SO","MV","ID","KI"],
+ ALPEN:["DE","FR","IT","CH","AT","SI","LI"],
+ G7:["US","CA","GB","FR","DE","IT","JP"],
+ BENELUX:["BE","NL","LU"],
+ MITTELMEER:["ES","FR","MC","IT","SI","HR","BA","ME","AL","GR","TR","CY","SY","LB","IL","PS","EG","LY","TN","DZ","MA","MT"],
+ ROM:["PT","ES","FR","IT","GB","BE","NL","DE","CH","AT","SI","HR","BA","RS","ME","MK","XK","AL","GR","BG","RO","HU","MD","TR","CY","SY","LB","IL","PS","JO","EG","LY","TN","DZ","MA","AM","GE","IQ","KW","SM","VA","MT","MC","LU"],
+ SEIDE:["CN","KZ","KG","UZ","TM","TJ","AF","IR","IQ","SY","TR","PK","IN","AZ","GE","AM"],
+ ALEXANDER:["GR","MK","BG","TR","SY","LB","IL","PS","JO","EG","IQ","IR","KW","TM","UZ","TJ","AF","PK","IN"],
+ RIFT:["ET","ER","DJ","KE","UG","RW","BI","TZ","MW","MZ","ZM","CD","IL","JO"],
+ PRAEKOL:["PE","MX","GT","BO","EC","HN","BZ","SV"],
+ SAFARI:["KE","TZ","UG","BW","NA","ZA"],
+ BIG5:["IN","CN","US","ID","PK"]
+};
+const KAT=["Sammeln","Geografie","Anreise","Geschichte","Bündnisse","Sprache","Erleben"];
+const cntSet=k=>SETS[k].filter(c=>rec(c)&&rec(c).v).length;
+const cntLg=l=>visited().filter(x=>(x.lg||[]).includes(l)).length;
+
+const ADEF=[
+{id:"laender",cat:"Sammeln",ic:"🛂",d:n=>n+" Länder mit mindestens einer Übernachtung",f:()=>visited().length,
+ tiers:[{n:1,t:"Erster Stempel",fl:"Erstreisende:r"},{n:10,t:"Zehnerclub"},{n:20,t:"Zwanzig",fl:"Vielgereiste:r"},{n:50,t:"Halbes Hundert",fl:"Weltensammler:in"}]},
+{id:"ziele",cat:"Sammeln",ic:"🎯",d:n=>n+" Ziele in Ländern abgehakt",f:()=>totalHl(),
+ tiers:[{n:25,t:"Sammler"},{n:75,t:"Zielstrebig",fl:"Zielstrebig"}]},
+{id:"essen",info:"Zählt jedes Land, in dem du im Feld „Bestes Essen“ etwas eingetragen hast.",cat:"Sammeln",ic:"🍲",d:n=>"In "+n+" Ländern das beste Essen notiert",f:()=>visited().filter(x=>(rec(x.c).food||"").trim()).length,
+ tiers:[{n:10,t:"Feinschmecker",fl:"Feinschmecker:in"},{n:25,t:"Gourmet",fl:"Gourmet"}]},
+{id:"fotos",cat:"Sammeln",ic:"📸",d:n=>n+" Fotos eingeklebt",f:()=>photoCount(),
+ tiers:[{n:10,t:"Bildband"},{n:40,t:"Chronist",fl:"Chronist:in"}]},
+
+{id:"kont",cat:"Geografie",ic:"🧭",d:n=>n+" Kontinente betreten",f:()=>contSet().size,
+ tiers:[{n:2,t:"Kontinentsprung"},{n:4,t:"Weltenbummler",fl:"Kontinentsammler:in"},{n:6,t:"Alle Kontinente",fl:"Erdumspanner:in"}]},
+{id:"insel",info:"Als Inselstaat zählt ein Land ohne Landverbindung zum Festland seines Kontinents. Großbritannien und Japan gehören dazu, Portugal trotz Azoren nicht.",cat:"Geografie",ic:"🏝️",d:n=>n+" Inselstaaten besucht",f:()=>visited().filter(x=>x.i).length,
+ tiers:[{n:1,t:"Inselstaat"},{n:5,t:"Inselhüpfer",fl:"Inselhüpfer:in"},{n:15,t:"Archipel-Sammler",fl:"Archipel-Sammler:in"}]},
+{id:"polar",info:"Der nördliche Polarkreis liegt bei 66,5° Nord. Nördlich davon geht die Sonne mindestens einen Tag im Jahr nicht unter. Es zählen Länder, die Gebiet nördlich dieser Linie haben — Norwegen, Schweden, Finnland, Russland, Kanada.",cat:"Geografie",ic:"❄️",d:()=>"Ein Land mit Gebiet nördlich des Polarkreises",f:()=>visited().filter(x=>x.arc).length,
+ tiers:[{n:1,t:"Polarkreis",fl:"Polarfahrer:in"}]},
+{id:"sued",cat:"Geografie",ic:"☀️",d:n=>n+" Länder südlich des Äquators",f:()=>visited().filter(x=>x.s).length,
+ tiers:[{n:1,t:"Südhalbkugel"},{n:5,t:"Südlandfahrer",fl:"Südlandfahrer:in"}]},
+{id:"equator",info:"Der Äquator durchquert 13 Staaten. Auf ihm dauert der Tag das ganze Jahr über etwa zwölf Stunden, Jahreszeiten im europäischen Sinn gibt es nicht.",cat:"Geografie",ic:"⭕",set:"EQUATOR",d:n=>n+" von 13 Ländern auf dem Äquator",
+ tiers:[{n:3,t:"Auf der Linie",fl:"Äquatorfahrer:in"},{n:7,t:"Herr der Linie",fl:"Linientreu"}]},
+{id:"klein",info:"Alle Länder mit weniger als einer Million Einwohnern — von Vatikanstadt mit rund tausend bis Zypern knapp darüber. Weltweit sind das fast 40 Staaten.",cat:"Geografie",ic:"🔬",d:n=>n+" Länder mit weniger als 1 Mio. Einwohnern",f:()=>visited().filter(x=>x.pop<1).length,
+ tiers:[{n:5,t:"Kleinstaaten-Kenner",fl:"Kleinstaaten-Kenner:in"},{n:10,t:"Zwergstaaten-Meister",fl:"Zwergstaaten-Meister:in"}]},
+{id:"big5",info:"Die fünf bevölkerungsreichsten Länder der Erde: Indien, China, USA, Indonesien und Pakistan. Zusammen leben dort über 3,5 Milliarden Menschen, gut 45 Prozent der Menschheit.",cat:"Geografie",ic:"🐘",set:"BIG5",d:()=>"Die fünf bevölkerungsreichsten Länder der Erde",
+ tiers:[{n:5,t:"Die Großen Fünf",fl:"Milliardenreisende:r"}]},
+{id:"alpen",info:"Die sieben Länder mit Anteil am Alpenbogen. Die Alpenkonvention hat formal acht Vertragsparteien, Monaco ist aber nur aus historischen Gründen dabei und hat keine Alpen.",cat:"Geografie",ic:"🏔️",set:"ALPEN",d:n=>n+" von 7 Alpenstaaten",
+ tiers:[{n:4,t:"Alpengänger"},{n:7,t:"Alpenkönig",fl:"Alpenkönig:in"}]},
+{id:"rift",info:"Der Great Rift Valley ist ein rund 6.000 Kilometer langes Grabenbruchsystem von Jordanien bis Mosambik, wo die Afrikanische Platte auseinanderbricht. Dort liegen die ostafrikanischen Grabenseen, viele Vulkane und die wichtigsten Fundstätten früher Hominiden.",cat:"Geografie",ic:"🌋",set:"RIFT",d:n=>n+" von 14 Ländern am Great Rift Valley",
+ tiers:[{n:4,t:"Great Rift Valley",fl:"Grabenbruch-Reisende:r"},{n:8,t:"Great Rift Valley komplett",fl:"Kind des Grabenbruchs"}]},
+{id:"nachbarn",cat:"Geografie",ic:"📍",set:"NACHBARN",d:n=>n+" der 9 Nachbarländer Deutschlands",
+ tiers:[{n:9,t:"Nachbarschaft",fl:"Grenzgänger:in"}]},
+
+{id:"auto",cat:"Anreise",ic:"🚗",d:()=>"Ein Land mit dem Auto erreicht",f:()=>hasMode("Auto"),tiers:[{n:1,t:"Mit dem Auto"}]},
+{id:"zug",cat:"Anreise",ic:"🚆",d:n=>n+" Länder mit dem Zug erreicht",f:()=>hasMode("Zug"),
+ tiers:[{n:1,t:"Mit dem Zug"},{n:5,t:"Schienennetz",fl:"Schienenreisende:r"}]},
+{id:"schiff",cat:"Anreise",ic:"⛴️",d:()=>"Ein Land per Schiff erreicht",f:()=>hasMode("Schiff"),tiers:[{n:1,t:"Über Wasser"}]},
+{id:"noplane",cat:"Anreise",ic:"🌱",d:n=>n+" Länder ohne Flug erreicht",
+ f:()=>visited().filter(x=>{const m=rec(x.c).modes||[];return m.length&&!m.includes("Flug")}).length,
+ tiers:[{n:8,t:"Landratte",fl:"Landratte"},{n:15,t:"Bodenhaftung",fl:"Bodenhaftung"}]},
+
+{id:"magellan",info:"1519 brach Magellan mit fünf Schiffen nach Westen auf, um Asien zu erreichen. Er selbst starb 1521 auf den Philippinen; Juan Sebastián Elcano brachte 1522 ein einziges Schiff mit 18 Mann zurück nach Spanien — die erste Weltumsegelung. Gezählt werden die heutigen Länder auf der Route.",cat:"Geschichte",ic:"⛵",set:"MAGELLAN",d:n=>n+" von 9 Ländern der ersten Weltumsegelung 1519–1522",
+ tiers:[{n:3,t:"In See gestochen"},{n:6,t:"Halbe Umrundung"},{n:9,t:"Auf Magellans Route",fl:"Weltumsegler:in"}]},
+{id:"rom",info:"Unter Kaiser Trajan erreichte das Römische Reich um 117 n. Chr. seine größte Ausdehnung: vom Atlantik bis an den Persischen Golf, von Schottland bis in die Sahara. Auf diesem Gebiet liegen heute 44 Staaten.",cat:"Geschichte",ic:"🏛️",set:"ROM",d:n=>n+" von 44 Ländern im Römischen Reich um 117 n. Chr.",
+ tiers:[{n:8,t:"Provinzler",fl:"Provinzler:in"},{n:15,t:"Civis Romanus",fl:"Civis Romanus"},{n:25,t:"Imperator",fl:"Imperator:in"}]},
+{id:"seide",info:"Die Seidenstraße war kein einzelner Weg, sondern ein Netz von Handelsrouten zwischen China und dem Mittelmeer, das etwa vom 2. Jahrhundert v. Chr. an bestand. Gehandelt wurden Seide, Gewürze und Papier — und mit ihnen reisten Religionen, Techniken und Seuchen.",cat:"Geschichte",ic:"🐫",set:"SEIDE",d:n=>n+" von 16 Ländern der Seidenstraße",
+ tiers:[{n:5,t:"Auf der Seidenstraße",fl:"Karawanenführer:in"},{n:9,t:"Karawanenmeister",fl:"Karawanenmeister:in"}]},
+{id:"alex",info:"Alexander der Große zog ab 334 v. Chr. von Makedonien bis an den Indus und schuf in gut zehn Jahren das größte Reich seiner Zeit. Nach seinem Tod 323 v. Chr. teilten es seine Generäle unter sich auf — sie heißen Diadochen, „Nachfolger“.",cat:"Geschichte",ic:"⚔️",set:"ALEXANDER",d:n=>n+" von 19 Ländern des Alexanderzugs",
+ tiers:[{n:6,t:"Auf Alexanders Spuren"},{n:11,t:"Bis ans Ende der Welt",fl:"Diadoche"}]},
+{id:"praekol",info:"Die großen Hochkulturen Amerikas vor 1492: die Maya in Guatemala, Mexiko, Belize und Honduras, die Azteken in Zentralmexiko, die Inka von Ecuador bis Bolivien und Chile. Von ihnen stehen heute Städte wie Tikal, Teotihuacán und Machu Picchu.",cat:"Geschichte",ic:"🗿",set:"PRAEKOL",d:n=>n+" von 8 Ländern der präkolumbischen Hochkulturen",
+ tiers:[{n:3,t:"Erbe der Hochkulturen",fl:"Erbe der Hochkulturen"},{n:6,t:"Kenner der Hochkulturen",fl:"Kenner der Hochkulturen"}]},
+
+{id:"med",info:"Die 22 Staaten mit Mittelmeerküste, von Spanien bis Marokko. Das Mittelmeer war jahrtausendelang die Hauptverkehrsader zwischen Europa, Afrika und Asien.",cat:"Bündnisse",ic:"🌊",set:"MITTELMEER",d:n=>n+" von 22 Mittelmeer-Anrainern",
+ tiers:[{n:5,t:"Mittelmeer-Anrainer",fl:"Küstenfahrer:in"},{n:12,t:"Mittelmeer-Kenner",fl:"Mittelmeer-Kenner:in"},{n:22,t:"Mittelmeer-Legende",fl:"Mittelmeer-Legende"}]},
+{id:"g7",info:"Die Gruppe der Sieben: USA, Japan, Deutschland, Vereinigtes Königreich, Frankreich, Italien und Kanada. Ein informeller Zusammenschluss großer westlicher Industriestaaten, der sich seit 1975 jährlich trifft.",cat:"Bündnisse",ic:"🎩",set:"G7",d:n=>n+" von 7 G7-Staaten",tiers:[{n:7,t:"G7 komplett",fl:"Gipfelgast"}]},
+{id:"benelux",cat:"Bündnisse",ic:"🧇",set:"BENELUX",d:n=>n+" von 3 Benelux-Staaten",tiers:[{n:3,t:"Benelux",fl:"Beneluxer:in"}]},
+
+{id:"es",cat:"Sprache",ic:"🇪🇸",d:n=>n+" Länder mit Spanisch als Amtssprache",f:()=>cntLg("es"),
+ tiers:[{n:3,t:"Spanisch für Anfänger"},{n:8,t:"Spanisch für Fortgeschrittene",fl:"Hispanist:in"},{n:15,t:"Spanisch für Muttersprachler",fl:"Hidalgo"}]},
+{id:"fr",cat:"Sprache",ic:"🇫🇷",d:n=>n+" Länder mit Französisch als Amtssprache",f:()=>cntLg("fr"),
+ tiers:[{n:3,t:"Un peu de français"},{n:8,t:"Frankophon",fl:"Frankophile:r"}]},
+{id:"ar",cat:"Sprache",ic:"🌙",d:n=>n+" Länder mit Arabisch als Amtssprache",f:()=>cntLg("ar"),
+ tiers:[{n:3,t:"Marhaba"},{n:8,t:"Von Maghreb bis Maschrek",fl:"Wüstenwanderer:in"}]},
+
+{id:"safari",info:"„Safari“ heißt auf Swahili schlicht „Reise“. Die sechs Länder gelten als die klassischen Ziele für Wildbeobachtung im südlichen und östlichen Afrika.",cat:"Erleben",ic:"🦁",set:"SAFARI",d:n=>n+" der 6 klassischen Safari-Länder",
+ tiers:[{n:2,t:"Safari Starter",fl:"Fährtenleser:in"},{n:6,t:"Safari Endboss",fl:"Safari-Endboss"}]},
+{id:"wieder",cat:"Erleben",ic:"🔁",d:n=>"Ein Land "+n+"× besucht",f:()=>Math.max(0,...visited().map(x=>rec(x.c).visits||1)),
+ tiers:[{n:3,t:"Wiederholungstäter",fl:"Stammgast"},{n:6,t:"Zweite Heimat",fl:"Zweite Heimat"}]},
+{id:"lang",cat:"Erleben",ic:"⏳",d:n=>n+" Tage am Stück in einem Land",f:()=>Math.max(0,...visited().map(x=>+rec(x.c).days||0)),
+ tiers:[{n:14,t:"Langstrecke",fl:"Langstreckler:in"},{n:30,t:"Ausgewandert auf Zeit",fl:"Zeitreisende:r"}]},
+{id:"leg",cat:"Erleben",ic:"💎",d:n=>n+" Länder der Stufe legendär",f:()=>visited().filter(x=>x.t===3).length,
+ tiers:[{n:1,t:"Legendär",fl:"Legendenjäger:in"},{n:10,t:"Legendensammler",fl:"Legendensammler:in"}]},
+{id:"stern",cat:"Erleben",ic:"⭐",d:()=>"Ein Land mit 5 Sternen bewertet",f:()=>visited().filter(x=>(rec(x.c).rating||0)===5).length,
+ tiers:[{n:1,t:"Bestnote"}]}
 ];
+
 function achs(){
-  if(GUEST&&gMask) return ACHDEF.map((a,i)=>Object.assign({},a,{cur:0,need:0,ok:!!(gMask[i>>3]&(1<<(i&7)))}));
-  return ACHDEF.map(a=>{const[c,n]=a.f();return Object.assign({},a,{cur:Math.min(c,n),need:n,ok:c>=n})});
+  const out=[];
+  ADEF.forEach(def=>{
+    const cur=def.f?def.f():cntSet(def.set);
+    def.tiers.forEach((tt,i)=>out.push({key:def.id+"-"+i,grp:def.id,cat:def.cat,ic:def.ic,set:def.set,
+      t:tt.t,fl:tt.fl,d:def.d(tt.n),raw:cur,cur:Math.min(cur,tt.n),need:tt.n,ok:cur>=tt.n,stufe:i+1,vonStufen:def.tiers.length}));
+  });
+  if(GUEST&&gMask) out.forEach((z,i)=>{z.ok=!!(gMask[i>>3]&(1<<(i&7)));z.cur=z.ok?z.need:0;z.raw=z.cur;});
+  return out;
 }
-function flairs(){return achs().filter(a=>a.fl).map(a=>({name:a.fl,ok:a.ok,von:a.t}))}
+function gruppen(){
+  const a=achs(),g=[];
+  ADEF.forEach(def=>{
+    const slots=a.filter(z=>z.grp===def.id);
+    const erreicht=slots.filter(z=>z.ok).length;
+    const naechst=slots.find(z=>!z.ok)||null;
+    g.push({def,slots,erreicht,naechst,fertig:erreicht===slots.length,raw:slots[0].raw});
+  });
+  return g;
+}
+function flairs(){return achs().filter(a=>a.fl).map(a=>({name:a.fl,ok:a.ok,von:a.t}));}
+
 
 /* ====== Rendering ====== */
 let tab="dex", filter="all", kfilter="", q="", justStamped=null;
@@ -658,8 +754,8 @@ function renderBook(){
   const rated=v.filter(x=>rec(x.c).rating).sort((a,c)=>rec(c.c).rating-rec(a.c).rating);
   const st=(n,l)=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
   s.innerHTML=st(v.length,"Länder")+st(contSet().size+"/6","Kontinente")+st(totalHl(),"Ziele")+
-    st(Math.max(0,...v.map(x=>+rec(x.c).days||0))||0,"Längste Reise (T)")+st(photoCount(),"Fotos")+
-    st(rated[0]?rated[0].f:"—","Bestbewertet");
+    st(Math.max(0,...v.map(x=>+rec(x.c).days||0))||0,"Längste Reise (T)")+
+    (GUEST?"":st(photoCount(),"Fotos"))+st(rated[0]?rated[0].f:"—","Bestbewertet");
   if(!v.length){b.innerHTML='<div class="empty" style="grid-column:1/-1">Noch kein Stempel. Öffne im Dex ein Land und setze einen.</div>';return;}
   b.innerHTML=v.sort((a,c)=>(rec(a.c).first||"9").localeCompare(rec(c.c).first||"9")).map(x=>{
     const r=rec(x.c),h=hash(x.c);
@@ -670,13 +766,75 @@ function renderBook(){
   }).join("");
 }
 
+let aFilter="all", aKat="";
 function renderAch(){
-  const a=achs();
-  document.getElementById("achList").innerHTML=
-    `<p class="note" style="margin-bottom:12px">${a.filter(z=>z.ok).length} von ${a.length} Orden · jeder Orden bringt 15 XP.</p>`+
-    a.map(z=>`<div class="ach${z.ok?"":" locked"}"><div class="ic">${z.ic}</div>
-      <div><div class="t">${z.t}</div><div class="d">${z.d}</div>
-      <div class="pg">${z.ok?"Erhalten"+(z.fl?" · Flair „"+z.fl+"“":""):(GUEST?"Noch offen":z.cur+" / "+z.need)}</div></div></div>`).join("");
+  const fh=document.getElementById("achFilters");
+  if(!fh.dataset.done){
+    fh.innerHTML=[["all","Alle"],["done","Erhalten"],["open","Offen"],["near","Fast geschafft"]]
+      .map(([k,l],i)=>`<button class="chip" data-af="${k}" aria-pressed="${i===0}">${l}</button>`).join("");
+    document.getElementById("achKat").innerHTML='<button class="chip" data-ak="" aria-pressed="true">Alle</button>'+
+      KAT.map(k=>`<button class="chip" data-ak="${k}" aria-pressed="false">${k}</button>`).join("");
+    fh.dataset.done=1;
+  }
+  const alle=achs(), erh=alle.filter(z=>z.ok).length;
+  let g=gruppen().filter(x=>{
+    if(aKat&&x.def.cat!==aKat)return false;
+    if(aFilter==="done")return x.fertig;
+    if(aFilter==="open")return !x.fertig;
+    if(aFilter==="near")return !x.fertig&&x.naechst&&x.naechst.need>0&&x.naechst.cur/x.naechst.need>=.5;
+    return true;
+  });
+  const kopf=`<p class="note" style="margin-bottom:12px">${erh} von ${alle.length} Ordensstufen · jede Stufe bringt 15 XP.</p>`;
+  if(!g.length){document.getElementById("achList").innerHTML=kopf+'<div class="empty">Hier ist gerade nichts.</div>';return;}
+  document.getElementById("achList").innerHTML=kopf+g.map(x=>{
+    const hoch=x.slots.filter(z=>z.ok).pop();
+    const titel=hoch?hoch.t:x.slots[0].t;
+    const pips=x.slots.map(z=>`<span class="pip${z.ok?" on":""}"></span>`).join("");
+    const stand=x.fertig
+      ? "Alle Stufen erhalten"+(hoch&&hoch.fl?" · Flair „"+hoch.fl+"“":"")
+      : (GUEST?"Noch offen":x.naechst.cur+" / "+x.naechst.need+" → "+x.naechst.t);
+    return `<button class="ach${x.fertig?"":" locked"}" data-grp="${x.def.id}">
+      <div class="ic">${x.def.ic}</div>
+      <div style="flex:1;min-width:0"><div class="t">${titel}</div>
+        <div class="d">${x.fertig?x.slots[x.slots.length-1].d:x.naechst.d}</div>
+        <div class="pg">${stand}</div>
+        ${x.slots.length>1?`<div class="pips">${pips}</div>`:""}</div>
+      <div class="chev">›</div></button>`;
+  }).join("");
+}
+
+function openAchSheet(id){
+  const x=gruppen().find(z=>z.def.id===id); if(!x)return;
+  const def=x.def;
+  const stufen=x.slots.map(z=>`<div class="hl${z.ok?" done":""}">
+    <span class="box${z.ok?" on":""}" style="cursor:default">${z.ok?"✓":""}</span>
+    <span class="tx">${z.t}<br><span style="font-size:11.5px;color:var(--ink-soft)">${z.d}${z.fl?" · Flair „"+z.fl+"“":""}</span></span>
+    ${GUEST?"":`<span class="pg" style="font-family:var(--mono);font-size:10px;color:var(--ink-soft)">${Math.min(z.raw,z.need)}/${z.need}</span>`}
+  </div>`).join("");
+  let laender="";
+  if(def.set){
+    const liste=SETS[def.set].map(c=>byCode(c)).filter(Boolean)
+      .sort((a,b)=>{const av=rec(a.c)&&rec(a.c).v?0:1,bv=rec(b.c)&&rec(b.c).v?0:1;return av-bv||a.n.localeCompare(b.n,"de")});
+    laender=`<div class="sec"><h3>Länder · ${liste.filter(z=>rec(z.c)&&rec(z.c).v).length}/${liste.length}</h3>
+      <div class="setgrid">${liste.map(z=>{const on=rec(z.c)&&rec(z.c).v;
+        return `<div class="setitem${on?" on":""}"><span>${z.f}</span><span>${z.n}</span><b>${on?"✓":"·"}</b></div>`}).join("")}</div>
+      <div class="hint">Angehakt heißt: besucht mit Übernachtung.</div></div>`;
+  }
+  document.getElementById("sheetHost").innerHTML=`<div class="sheet" id="sheet"><div class="page">
+    <div class="page-hd"><div class="flag">${def.ic}</div>
+      <div><h2>${x.slots[x.slots.length-1].t}</h2><div class="meta">${def.cat} · ${x.erreicht}/${x.slots.length} Stufen</div></div>
+      <button class="close" data-act="close" aria-label="Schließen">✕</button></div>
+    ${def.info?`<div class="sec"><h3>Worum es geht</h3><p style="font-size:13.5px;margin:0;line-height:1.5">${def.info}</p></div>`:""}
+    <div class="sec"><h3>Stufen</h3>${stufen}</div>
+    ${laender}
+    <div class="sec" style="border:0;text-align:right"><button class="smallbtn" data-act="close">Schließen</button></div>
+  </div></div>`;
+  document.body.style.overflow="hidden";
+  const sh=document.getElementById("sheet");
+  sh.addEventListener("click",e=>{
+    if(e.target===sh||e.target.closest('[data-act="close"]')){
+      document.getElementById("sheetHost").innerHTML="";document.body.style.overflow="";}
+  });
 }
 
 function renderProf(){
@@ -694,7 +852,7 @@ function renderProf(){
       ${row(totalHl()+" Ziele à 3",xpZiele())}
       ${row(achs().filter(a=>a.ok).length+" Orden à 15",xpOrden())}
       <div class="xprow sum"><span><b>Summe</b></span><b>${p} XP</b></div>
-      <p class="note" style="margin-top:9px">Schnellster Weg nach oben: ein legendäres Land bringt 30 XP, ein Orden 15.</p>
+      <p class="note" style="margin-top:9px">Schnellster Weg nach oben: ein legendäres Land bringt 30 XP, eine Ordensstufe 15. Selbst angelegte Länder zählen immer als häufig, selbst ergänzte Ziele höchstens so oft, wie das Land vorgegebene Ziele hat.</p>
     </div>
     ${GUEST?"":`<div class="panel">
       <h3>Flair</h3>
@@ -760,7 +918,6 @@ function openSheet(c){
       <div><div class="k">Hauptstadt</div><div class="v">${x.cap}</div></div>
       <div><div class="k">Einwohner</div><div class="v">${nf(x.pop)}</div></div>
       <div><div class="k">Amtssprache</div><div class="v">${lgs||"—"}</div></div>
-      <div><div class="k">Besonderheit</div><div class="v">${[x.i?"Inselstaat":"",x.s?"Südhalbkugel":"",x.arc?"Polarkreis":""].filter(Boolean).join(" · ")||"—"}</div></div>
     </div><div class="hint">Einwohnerzahlen gerundet.</div></div>`:""}
 
     <div class="sec">
@@ -887,6 +1044,14 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
 }));
 document.getElementById("grid").addEventListener("click",e=>{if(GUEST)return;const c=e.target.closest(".card");if(c)openSheet(c.dataset.code);});
 document.getElementById("book").addEventListener("click",e=>{if(GUEST)return;const c=e.target.closest(".bigstamp");if(c)openSheet(c.dataset.code);});
+document.getElementById("achList").addEventListener("click",e=>{
+  const b=e.target.closest("[data-grp]"); if(b)openAchSheet(b.dataset.grp);});
+document.getElementById("achFilters").addEventListener("click",e=>{
+  const b=e.target.closest("[data-af]"); if(!b)return; aFilter=b.dataset.af;
+  document.querySelectorAll("#achFilters [data-af]").forEach(z=>z.setAttribute("aria-pressed",z===b));renderAch();});
+document.getElementById("achKat").addEventListener("click",e=>{
+  const b=e.target.closest("[data-ak]"); if(!b)return; aKat=b.dataset.ak;
+  document.querySelectorAll("#achKat [data-ak]").forEach(z=>z.setAttribute("aria-pressed",z===b));renderAch();});
 document.getElementById("profBody").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b)return;
   if(b.dataset.flair!==undefined){state.flair=b.dataset.flair;save();renderProf();renderPass();return;}
@@ -931,7 +1096,11 @@ document.getElementById("impFile").addEventListener("change",e=>{
 document.getElementById("resetBtn").addEventListener("click",()=>{
   if(!confirm("Alle Länder, Notizen und Fotos löschen? Das lässt sich nicht rückgängig machen."))return;
   state={name:"",photo:"",flair:"",custom:[],d:{}};save();document.getElementById("nameIn").value="";render();toast("Alles gelöscht.");});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openCode)closeSheet();});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  if(openCode){closeSheet();return;}
+  if(document.getElementById("sheet")){document.getElementById("sheetHost").innerHTML="";document.body.style.overflow="";}
+});
 
 /* ====== Start ====== */
 if("serviceWorker" in navigator && location.protocol==="https:")

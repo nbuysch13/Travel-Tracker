@@ -1,5 +1,5 @@
 /* Bei jedem neuen Upload die Zahl erhöhen, dann laden alle Geräte die neue Version. */
-const CACHE = "reisepass-v4";
+const CACHE = "reisepass-v6";
 const FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
