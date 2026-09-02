@@ -77,12 +77,21 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper2)}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:8px}
+.grid.liste{grid-template-columns:1fr;gap:5px}
+.grid.liste .card{flex-direction:row;align-items:center;gap:11px;min-height:0;padding:11px 12px}
+.grid.liste .card>div:first-child{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.grid.liste .flag{font-size:21px}
+.grid.liste .nm{font-family:var(--body);font-size:16px;letter-spacing:0;margin:0;padding:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid.liste .meta{margin:0;font-size:10px;flex:0 0 auto}
+.grid.liste .mini{position:static;transform:rotate(-6deg);flex:0 0 auto;margin-left:4px}
 .card{position:relative;text-align:left;background:var(--paper3);border:1px solid var(--line);border-radius:2px;
   padding:10px 10px 9px;min-height:82px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s ease}
 .card:active{transform:scale(.985)}
-.card.un{background:transparent;border-style:dashed;opacity:.62}
+.card.un{background:transparent;border-style:dashed}
+.card.un .meta{opacity:.85}
 .card .flag{font-size:19px;line-height:1}
-.card .nm{font-family:var(--display);font-size:13px;letter-spacing:.05em;margin-top:5px;padding-right:34px}
+.card .nm{font-family:var(--display);font-size:13.5px;letter-spacing:.03em;margin-top:5px;padding-right:34px}
 .card .meta{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;margin-top:4px}
 .tier3 .nm{color:var(--gold)}
 .card .mini{position:absolute;right:-6px;top:6px;transform:rotate(-13deg);border:1.5px solid var(--stamp);border-radius:3px;
@@ -190,6 +199,18 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .modes{display:flex;flex-wrap:wrap;gap:6px}
 .modes button{background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 10px;font-size:12.5px;color:var(--ink-soft)}
 .modes button.on{border-color:var(--ink);background:var(--ink);color:var(--paper2)}
+.ordenpop{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
+  background:rgba(22,50,63,.45);padding:20px}
+.ordenkarte{background:var(--paper2);border:2.5px solid var(--stamp);border-radius:4px;padding:20px 24px;
+  text-align:center;max-width:300px;position:relative;animation:slamIn .38s cubic-bezier(.2,1.4,.4,1) both}
+.ordenkarte::after{content:"";position:absolute;inset:5px;border:1px solid var(--stamp);opacity:.45;border-radius:2px}
+.ordenkarte .oben{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--stamp)}
+.ordenkarte .ic{font-size:38px;line-height:1;margin:9px 0 6px}
+.ordenkarte .tt{font-family:var(--display);font-size:18px;letter-spacing:.05em}
+.ordenkarte .dd{font-size:12.5px;color:var(--ink-soft);margin-top:5px;line-height:1.4}
+.ordenkarte .fl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--stamp);margin-top:9px}
+.ordenkarte .rest{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-soft);margin-top:8px}
+@keyframes slamIn{0%{transform:scale(2.2) rotate(-8deg);opacity:0}55%{opacity:1}100%{transform:scale(1) rotate(-1.5deg);opacity:1}}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--paper2);
   padding:9px 15px;border-radius:2px;font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
@@ -235,6 +256,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
     <section id="tab-dex">
       <div class="filters">
         <input id="search" placeholder="Land suchen…" autocomplete="off">
+        <button class="chip" id="viewToggle" title="Ansicht wechseln">Liste</button>
         <button class="chip" data-f="all" aria-pressed="true">Alle</button>
         <button class="chip" data-f="visited" aria-pressed="false">Besucht</button>
         <button class="chip" data-f="open" aria-pressed="false">Offen</button>
@@ -537,7 +559,7 @@ let gMask=null;
 
 /* ====== Speicher ====== */
 const KEY="reisepass.v1";
-let memOnly=false, state={name:"",photo:"",flair:"",custom:[],d:{}};
+let memOnly=false, state={name:"",photo:"",flair:"",view:"kachel",fs:1,custom:[],d:{}};
 function migrate(){
   Object.values(state.d||{}).forEach(r=>{
     if(r.mode!==undefined){ r.modes=r.mode?[r.mode]:[]; delete r.mode; }
@@ -600,76 +622,76 @@ const cntSet=k=>SETS[k].filter(c=>rec(c)&&rec(c).v).length;
 const cntLg=l=>visited().filter(x=>(x.lg||[]).includes(l)).length;
 
 const ADEF=[
-{id:"laender",cat:"Sammeln",ic:"🛂",d:n=>n+" Länder mit mindestens einer Übernachtung",f:()=>visited().length,
+{id:"laender",name:"Länder",cat:"Sammeln",ic:"🛂",d:n=>n+" Länder mit mindestens einer Übernachtung",f:()=>visited().length,
  tiers:[{n:1,t:"Erster Stempel",fl:"Erstreisende:r"},{n:10,t:"Zehnerclub"},{n:20,t:"Zwanzig",fl:"Vielgereiste:r"},{n:50,t:"Halbes Hundert",fl:"Weltensammler:in"}]},
-{id:"ziele",cat:"Sammeln",ic:"🎯",d:n=>n+" Ziele in Ländern abgehakt",f:()=>totalHl(),
+{id:"ziele",name:"Ziele",cat:"Sammeln",ic:"🎯",d:n=>n+" Ziele in Ländern abgehakt",f:()=>totalHl(),
  tiers:[{n:25,t:"Sammler"},{n:75,t:"Zielstrebig",fl:"Zielstrebig"}]},
-{id:"essen",info:"Zählt jedes Land, in dem du im Feld „Bestes Essen“ etwas eingetragen hast.",cat:"Sammeln",ic:"🍲",d:n=>"In "+n+" Ländern das beste Essen notiert",f:()=>visited().filter(x=>(rec(x.c).food||"").trim()).length,
+{id:"essen",name:"Feinschmecker",info:"Zählt jedes Land, in dem du im Feld „Bestes Essen“ etwas eingetragen hast.",cat:"Sammeln",ic:"🍲",d:n=>"In "+n+" Ländern das beste Essen notiert",f:()=>visited().filter(x=>(rec(x.c).food||"").trim()).length,
  tiers:[{n:10,t:"Feinschmecker",fl:"Feinschmecker:in"},{n:25,t:"Gourmet",fl:"Gourmet"}]},
-{id:"fotos",cat:"Sammeln",ic:"📸",d:n=>n+" Fotos eingeklebt",f:()=>photoCount(),
+{id:"fotos",name:"Fotoalbum",cat:"Sammeln",ic:"📸",d:n=>n+" Fotos eingeklebt",f:()=>photoCount(),
  tiers:[{n:10,t:"Bildband"},{n:40,t:"Chronist",fl:"Chronist:in"}]},
 
-{id:"kont",cat:"Geografie",ic:"🧭",d:n=>n+" Kontinente betreten",f:()=>contSet().size,
+{id:"kont",name:"Kontinente",cat:"Geografie",ic:"🧭",d:n=>n+" Kontinente betreten",f:()=>contSet().size,
  tiers:[{n:2,t:"Kontinentsprung"},{n:4,t:"Weltenbummler",fl:"Kontinentsammler:in"},{n:6,t:"Alle Kontinente",fl:"Erdumspanner:in"}]},
-{id:"insel",info:"Als Inselstaat zählt ein Land ohne Landverbindung zum Festland seines Kontinents. Großbritannien und Japan gehören dazu, Portugal trotz Azoren nicht.",cat:"Geografie",ic:"🏝️",d:n=>n+" Inselstaaten besucht",f:()=>visited().filter(x=>x.i).length,
+{id:"insel",name:"Inselstaaten",info:"Als Inselstaat zählt ein Land ohne Landverbindung zum Festland seines Kontinents. Großbritannien und Japan gehören dazu, Portugal trotz Azoren nicht.",cat:"Geografie",ic:"🏝️",d:n=>n+" Inselstaaten besucht",f:()=>visited().filter(x=>x.i).length,
  tiers:[{n:1,t:"Inselstaat"},{n:5,t:"Inselhüpfer",fl:"Inselhüpfer:in"},{n:15,t:"Archipel-Sammler",fl:"Archipel-Sammler:in"}]},
-{id:"polar",info:"Der nördliche Polarkreis liegt bei 66,5° Nord. Nördlich davon geht die Sonne mindestens einen Tag im Jahr nicht unter. Es zählen Länder, die Gebiet nördlich dieser Linie haben — Norwegen, Schweden, Finnland, Russland, Kanada.",cat:"Geografie",ic:"❄️",d:()=>"Ein Land mit Gebiet nördlich des Polarkreises",f:()=>visited().filter(x=>x.arc).length,
+{id:"polar",name:"Polarkreis",info:"Der nördliche Polarkreis liegt bei 66,5° Nord. Nördlich davon geht die Sonne mindestens einen Tag im Jahr nicht unter. Es zählen Länder, die Gebiet nördlich dieser Linie haben — Norwegen, Schweden, Finnland, Russland, Kanada.",cat:"Geografie",ic:"❄️",d:()=>"Ein Land mit Gebiet nördlich des Polarkreises",f:()=>visited().filter(x=>x.arc).length,
  tiers:[{n:1,t:"Polarkreis",fl:"Polarfahrer:in"}]},
-{id:"sued",cat:"Geografie",ic:"☀️",d:n=>n+" Länder südlich des Äquators",f:()=>visited().filter(x=>x.s).length,
+{id:"sued",name:"Südhalbkugel",cat:"Geografie",ic:"☀️",d:n=>n+" Länder südlich des Äquators",f:()=>visited().filter(x=>x.s).length,
  tiers:[{n:1,t:"Südhalbkugel"},{n:5,t:"Südlandfahrer",fl:"Südlandfahrer:in"}]},
-{id:"equator",info:"Der Äquator durchquert 13 Staaten. Auf ihm dauert der Tag das ganze Jahr über etwa zwölf Stunden, Jahreszeiten im europäischen Sinn gibt es nicht.",cat:"Geografie",ic:"⭕",set:"EQUATOR",d:n=>n+" von 13 Ländern auf dem Äquator",
+{id:"equator",name:"Äquator",info:"Der Äquator durchquert 13 Staaten. Auf ihm dauert der Tag das ganze Jahr über etwa zwölf Stunden, Jahreszeiten im europäischen Sinn gibt es nicht.",cat:"Geografie",ic:"⭕",set:"EQUATOR",d:n=>n+" von 13 Ländern auf dem Äquator",
  tiers:[{n:3,t:"Auf der Linie",fl:"Äquatorfahrer:in"},{n:7,t:"Herr der Linie",fl:"Linientreu"}]},
-{id:"klein",info:"Alle Länder mit weniger als einer Million Einwohnern — von Vatikanstadt mit rund tausend bis Zypern knapp darüber. Weltweit sind das fast 40 Staaten.",cat:"Geografie",ic:"🔬",d:n=>n+" Länder mit weniger als 1 Mio. Einwohnern",f:()=>visited().filter(x=>x.pop<1).length,
+{id:"klein",name:"Kleinstaaten",info:"Alle Länder mit weniger als einer Million Einwohnern — von Vatikanstadt mit rund tausend bis Zypern knapp darüber. Weltweit sind das fast 40 Staaten.",cat:"Geografie",ic:"🔬",d:n=>n+" Länder mit weniger als 1 Mio. Einwohnern",f:()=>visited().filter(x=>x.pop<1).length,
  tiers:[{n:5,t:"Kleinstaaten-Kenner",fl:"Kleinstaaten-Kenner:in"},{n:10,t:"Zwergstaaten-Meister",fl:"Zwergstaaten-Meister:in"}]},
-{id:"big5",info:"Die fünf bevölkerungsreichsten Länder der Erde: Indien, China, USA, Indonesien und Pakistan. Zusammen leben dort über 3,5 Milliarden Menschen, gut 45 Prozent der Menschheit.",cat:"Geografie",ic:"🐘",set:"BIG5",d:()=>"Die fünf bevölkerungsreichsten Länder der Erde",
+{id:"big5",name:"Die Großen Fünf",info:"Die fünf bevölkerungsreichsten Länder der Erde: Indien, China, USA, Indonesien und Pakistan. Zusammen leben dort über 3,5 Milliarden Menschen, gut 45 Prozent der Menschheit.",cat:"Geografie",ic:"🐘",set:"BIG5",d:()=>"Die fünf bevölkerungsreichsten Länder der Erde",
  tiers:[{n:5,t:"Die Großen Fünf",fl:"Milliardenreisende:r"}]},
-{id:"alpen",info:"Die sieben Länder mit Anteil am Alpenbogen. Die Alpenkonvention hat formal acht Vertragsparteien, Monaco ist aber nur aus historischen Gründen dabei und hat keine Alpen.",cat:"Geografie",ic:"🏔️",set:"ALPEN",d:n=>n+" von 7 Alpenstaaten",
+{id:"alpen",name:"Alpenstaaten",info:"Die sieben Länder mit Anteil am Alpenbogen. Die Alpenkonvention hat formal acht Vertragsparteien, Monaco ist aber nur aus historischen Gründen dabei und hat keine Alpen.",cat:"Geografie",ic:"🏔️",set:"ALPEN",d:n=>n+" von 7 Alpenstaaten",
  tiers:[{n:4,t:"Alpengänger"},{n:7,t:"Alpenkönig",fl:"Alpenkönig:in"}]},
-{id:"rift",info:"Der Great Rift Valley ist ein rund 6.000 Kilometer langes Grabenbruchsystem von Jordanien bis Mosambik, wo die Afrikanische Platte auseinanderbricht. Dort liegen die ostafrikanischen Grabenseen, viele Vulkane und die wichtigsten Fundstätten früher Hominiden.",cat:"Geografie",ic:"🌋",set:"RIFT",d:n=>n+" von 14 Ländern am Great Rift Valley",
+{id:"rift",name:"Great Rift Valley",info:"Der Great Rift Valley ist ein rund 6.000 Kilometer langes Grabenbruchsystem von Jordanien bis Mosambik, wo die Afrikanische Platte auseinanderbricht. Dort liegen die ostafrikanischen Grabenseen, viele Vulkane und die wichtigsten Fundstätten früher Hominiden.",cat:"Geografie",ic:"🌋",set:"RIFT",d:n=>n+" von 14 Ländern am Great Rift Valley",
  tiers:[{n:4,t:"Great Rift Valley",fl:"Grabenbruch-Reisende:r"},{n:8,t:"Great Rift Valley komplett",fl:"Kind des Grabenbruchs"}]},
-{id:"nachbarn",cat:"Geografie",ic:"📍",set:"NACHBARN",d:n=>n+" der 9 Nachbarländer Deutschlands",
+{id:"nachbarn",name:"Nachbarländer",cat:"Geografie",ic:"📍",set:"NACHBARN",d:n=>n+" der 9 Nachbarländer Deutschlands",
  tiers:[{n:9,t:"Nachbarschaft",fl:"Grenzgänger:in"}]},
 
-{id:"auto",cat:"Anreise",ic:"🚗",d:()=>"Ein Land mit dem Auto erreicht",f:()=>hasMode("Auto"),tiers:[{n:1,t:"Mit dem Auto"}]},
-{id:"zug",cat:"Anreise",ic:"🚆",d:n=>n+" Länder mit dem Zug erreicht",f:()=>hasMode("Zug"),
+{id:"auto",name:"Mit dem Auto",cat:"Anreise",ic:"🚗",d:()=>"Ein Land mit dem Auto erreicht",f:()=>hasMode("Auto"),tiers:[{n:1,t:"Mit dem Auto"}]},
+{id:"zug",name:"Mit dem Zug",cat:"Anreise",ic:"🚆",d:n=>n+" Länder mit dem Zug erreicht",f:()=>hasMode("Zug"),
  tiers:[{n:1,t:"Mit dem Zug"},{n:5,t:"Schienennetz",fl:"Schienenreisende:r"}]},
-{id:"schiff",cat:"Anreise",ic:"⛴️",d:()=>"Ein Land per Schiff erreicht",f:()=>hasMode("Schiff"),tiers:[{n:1,t:"Über Wasser"}]},
-{id:"noplane",cat:"Anreise",ic:"🌱",d:n=>n+" Länder ohne Flug erreicht",
+{id:"schiff",name:"Über Wasser",cat:"Anreise",ic:"⛴️",d:()=>"Ein Land per Schiff erreicht",f:()=>hasMode("Schiff"),tiers:[{n:1,t:"Über Wasser"}]},
+{id:"noplane",name:"Ohne Flug",cat:"Anreise",ic:"🌱",d:n=>n+" Länder ohne Flug erreicht",
  f:()=>visited().filter(x=>{const m=rec(x.c).modes||[];return m.length&&!m.includes("Flug")}).length,
  tiers:[{n:8,t:"Landratte",fl:"Landratte"},{n:15,t:"Bodenhaftung",fl:"Bodenhaftung"}]},
 
-{id:"magellan",info:"1519 brach Magellan mit fünf Schiffen nach Westen auf, um Asien zu erreichen. Er selbst starb 1521 auf den Philippinen; Juan Sebastián Elcano brachte 1522 ein einziges Schiff mit 18 Mann zurück nach Spanien — die erste Weltumsegelung. Gezählt werden die heutigen Länder auf der Route.",cat:"Geschichte",ic:"⛵",set:"MAGELLAN",d:n=>n+" von 9 Ländern der ersten Weltumsegelung 1519–1522",
+{id:"magellan",name:"Magellans Route",info:"1519 brach Magellan mit fünf Schiffen nach Westen auf, um Asien zu erreichen. Er selbst starb 1521 auf den Philippinen; Juan Sebastián Elcano brachte 1522 ein einziges Schiff mit 18 Mann zurück nach Spanien — die erste Weltumsegelung. Gezählt werden die heutigen Länder auf der Route.",cat:"Geschichte",ic:"⛵",set:"MAGELLAN",d:n=>n+" von 9 Ländern der ersten Weltumsegelung 1519–1522",
  tiers:[{n:3,t:"In See gestochen"},{n:6,t:"Halbe Umrundung"},{n:9,t:"Auf Magellans Route",fl:"Weltumsegler:in"}]},
-{id:"rom",info:"Unter Kaiser Trajan erreichte das Römische Reich um 117 n. Chr. seine größte Ausdehnung: vom Atlantik bis an den Persischen Golf, von Schottland bis in die Sahara. Auf diesem Gebiet liegen heute 44 Staaten.",cat:"Geschichte",ic:"🏛️",set:"ROM",d:n=>n+" von 44 Ländern im Römischen Reich um 117 n. Chr.",
+{id:"rom",name:"Römisches Reich",info:"Unter Kaiser Trajan erreichte das Römische Reich um 117 n. Chr. seine größte Ausdehnung: vom Atlantik bis an den Persischen Golf, von Schottland bis in die Sahara. Auf diesem Gebiet liegen heute 44 Staaten.",cat:"Geschichte",ic:"🏛️",set:"ROM",d:n=>n+" von 44 Ländern im Römischen Reich um 117 n. Chr.",
  tiers:[{n:8,t:"Provinzler",fl:"Provinzler:in"},{n:15,t:"Civis Romanus",fl:"Civis Romanus"},{n:25,t:"Imperator",fl:"Imperator:in"}]},
-{id:"seide",info:"Die Seidenstraße war kein einzelner Weg, sondern ein Netz von Handelsrouten zwischen China und dem Mittelmeer, das etwa vom 2. Jahrhundert v. Chr. an bestand. Gehandelt wurden Seide, Gewürze und Papier — und mit ihnen reisten Religionen, Techniken und Seuchen.",cat:"Geschichte",ic:"🐫",set:"SEIDE",d:n=>n+" von 16 Ländern der Seidenstraße",
+{id:"seide",name:"Seidenstraße",info:"Die Seidenstraße war kein einzelner Weg, sondern ein Netz von Handelsrouten zwischen China und dem Mittelmeer, das etwa vom 2. Jahrhundert v. Chr. an bestand. Gehandelt wurden Seide, Gewürze und Papier — und mit ihnen reisten Religionen, Techniken und Seuchen.",cat:"Geschichte",ic:"🐫",set:"SEIDE",d:n=>n+" von 16 Ländern der Seidenstraße",
  tiers:[{n:5,t:"Auf der Seidenstraße",fl:"Karawanenführer:in"},{n:9,t:"Karawanenmeister",fl:"Karawanenmeister:in"}]},
-{id:"alex",info:"Alexander der Große zog ab 334 v. Chr. von Makedonien bis an den Indus und schuf in gut zehn Jahren das größte Reich seiner Zeit. Nach seinem Tod 323 v. Chr. teilten es seine Generäle unter sich auf — sie heißen Diadochen, „Nachfolger“.",cat:"Geschichte",ic:"⚔️",set:"ALEXANDER",d:n=>n+" von 19 Ländern des Alexanderzugs",
+{id:"alex",name:"Alexanderzug",info:"Alexander der Große zog ab 334 v. Chr. von Makedonien bis an den Indus und schuf in gut zehn Jahren das größte Reich seiner Zeit. Nach seinem Tod 323 v. Chr. teilten es seine Generäle unter sich auf — sie heißen Diadochen, „Nachfolger“.",cat:"Geschichte",ic:"⚔️",set:"ALEXANDER",d:n=>n+" von 19 Ländern des Alexanderzugs",
  tiers:[{n:6,t:"Auf Alexanders Spuren"},{n:11,t:"Bis ans Ende der Welt",fl:"Diadoche"}]},
-{id:"praekol",info:"Die großen Hochkulturen Amerikas vor 1492: die Maya in Guatemala, Mexiko, Belize und Honduras, die Azteken in Zentralmexiko, die Inka von Ecuador bis Bolivien und Chile. Von ihnen stehen heute Städte wie Tikal, Teotihuacán und Machu Picchu.",cat:"Geschichte",ic:"🗿",set:"PRAEKOL",d:n=>n+" von 8 Ländern der präkolumbischen Hochkulturen",
+{id:"praekol",name:"Präkolumbische Hochkulturen",info:"Die großen Hochkulturen Amerikas vor 1492: die Maya in Guatemala, Mexiko, Belize und Honduras, die Azteken in Zentralmexiko, die Inka von Ecuador bis Bolivien und Chile. Von ihnen stehen heute Städte wie Tikal, Teotihuacán und Machu Picchu.",cat:"Geschichte",ic:"🗿",set:"PRAEKOL",d:n=>n+" von 8 Ländern der präkolumbischen Hochkulturen",
  tiers:[{n:3,t:"Erbe der Hochkulturen",fl:"Erbe der Hochkulturen"},{n:6,t:"Kenner der Hochkulturen",fl:"Kenner der Hochkulturen"}]},
 
-{id:"med",info:"Die 22 Staaten mit Mittelmeerküste, von Spanien bis Marokko. Das Mittelmeer war jahrtausendelang die Hauptverkehrsader zwischen Europa, Afrika und Asien.",cat:"Bündnisse",ic:"🌊",set:"MITTELMEER",d:n=>n+" von 22 Mittelmeer-Anrainern",
+{id:"med",name:"Mittelmeer",info:"Die 22 Staaten mit Mittelmeerküste, von Spanien bis Marokko. Das Mittelmeer war jahrtausendelang die Hauptverkehrsader zwischen Europa, Afrika und Asien.",cat:"Bündnisse",ic:"🌊",set:"MITTELMEER",d:n=>n+" von 22 Mittelmeer-Anrainern",
  tiers:[{n:5,t:"Mittelmeer-Anrainer",fl:"Küstenfahrer:in"},{n:12,t:"Mittelmeer-Kenner",fl:"Mittelmeer-Kenner:in"},{n:22,t:"Mittelmeer-Legende",fl:"Mittelmeer-Legende"}]},
-{id:"g7",info:"Die Gruppe der Sieben: USA, Japan, Deutschland, Vereinigtes Königreich, Frankreich, Italien und Kanada. Ein informeller Zusammenschluss großer westlicher Industriestaaten, der sich seit 1975 jährlich trifft.",cat:"Bündnisse",ic:"🎩",set:"G7",d:n=>n+" von 7 G7-Staaten",tiers:[{n:7,t:"G7 komplett",fl:"Gipfelgast"}]},
-{id:"benelux",cat:"Bündnisse",ic:"🧇",set:"BENELUX",d:n=>n+" von 3 Benelux-Staaten",tiers:[{n:3,t:"Benelux",fl:"Beneluxer:in"}]},
+{id:"g7",name:"G7",info:"Die Gruppe der Sieben: USA, Japan, Deutschland, Vereinigtes Königreich, Frankreich, Italien und Kanada. Ein informeller Zusammenschluss großer westlicher Industriestaaten, der sich seit 1975 jährlich trifft.",cat:"Bündnisse",ic:"🎩",set:"G7",d:n=>n+" von 7 G7-Staaten",tiers:[{n:7,t:"G7 komplett",fl:"Gipfelgast"}]},
+{id:"benelux",name:"Benelux",cat:"Bündnisse",ic:"🧇",set:"BENELUX",d:n=>n+" von 3 Benelux-Staaten",tiers:[{n:3,t:"Benelux",fl:"Beneluxer:in"}]},
 
-{id:"es",cat:"Sprache",ic:"🇪🇸",d:n=>n+" Länder mit Spanisch als Amtssprache",f:()=>cntLg("es"),
+{id:"es",name:"Spanisch",cat:"Sprache",ic:"🇪🇸",d:n=>n+" Länder mit Spanisch als Amtssprache",f:()=>cntLg("es"),
  tiers:[{n:3,t:"Spanisch für Anfänger"},{n:8,t:"Spanisch für Fortgeschrittene",fl:"Hispanist:in"},{n:15,t:"Spanisch für Muttersprachler",fl:"Hidalgo"}]},
-{id:"fr",cat:"Sprache",ic:"🇫🇷",d:n=>n+" Länder mit Französisch als Amtssprache",f:()=>cntLg("fr"),
+{id:"fr",name:"Französisch",cat:"Sprache",ic:"🇫🇷",d:n=>n+" Länder mit Französisch als Amtssprache",f:()=>cntLg("fr"),
  tiers:[{n:3,t:"Un peu de français"},{n:8,t:"Frankophon",fl:"Frankophile:r"}]},
-{id:"ar",cat:"Sprache",ic:"🌙",d:n=>n+" Länder mit Arabisch als Amtssprache",f:()=>cntLg("ar"),
+{id:"ar",name:"Arabisch",cat:"Sprache",ic:"🌙",d:n=>n+" Länder mit Arabisch als Amtssprache",f:()=>cntLg("ar"),
  tiers:[{n:3,t:"Marhaba"},{n:8,t:"Von Maghreb bis Maschrek",fl:"Wüstenwanderer:in"}]},
 
-{id:"safari",info:"„Safari“ heißt auf Swahili schlicht „Reise“. Die sechs Länder gelten als die klassischen Ziele für Wildbeobachtung im südlichen und östlichen Afrika.",cat:"Erleben",ic:"🦁",set:"SAFARI",d:n=>n+" der 6 klassischen Safari-Länder",
+{id:"safari",name:"Safari",info:"„Safari“ heißt auf Swahili schlicht „Reise“. Die sechs Länder gelten als die klassischen Ziele für Wildbeobachtung im südlichen und östlichen Afrika.",cat:"Erleben",ic:"🦁",set:"SAFARI",d:n=>n+" der 6 klassischen Safari-Länder",
  tiers:[{n:2,t:"Safari Starter",fl:"Fährtenleser:in"},{n:6,t:"Safari Endboss",fl:"Safari-Endboss"}]},
-{id:"wieder",cat:"Erleben",ic:"🔁",d:n=>"Ein Land "+n+"× besucht",f:()=>Math.max(0,...visited().map(x=>rec(x.c).visits||1)),
+{id:"wieder",name:"Wiederbesuche",cat:"Erleben",ic:"🔁",d:n=>"Ein Land "+n+"× besucht",f:()=>Math.max(0,...visited().map(x=>rec(x.c).visits||1)),
  tiers:[{n:3,t:"Wiederholungstäter",fl:"Stammgast"},{n:6,t:"Zweite Heimat",fl:"Zweite Heimat"}]},
-{id:"lang",cat:"Erleben",ic:"⏳",d:n=>n+" Tage am Stück in einem Land",f:()=>Math.max(0,...visited().map(x=>+rec(x.c).days||0)),
+{id:"lang",name:"Lange Aufenthalte",cat:"Erleben",ic:"⏳",d:n=>n+" Tage am Stück in einem Land",f:()=>Math.max(0,...visited().map(x=>+rec(x.c).days||0)),
  tiers:[{n:14,t:"Langstrecke",fl:"Langstreckler:in"},{n:30,t:"Ausgewandert auf Zeit",fl:"Zeitreisende:r"}]},
-{id:"leg",cat:"Erleben",ic:"💎",d:n=>n+" Länder der Stufe legendär",f:()=>visited().filter(x=>x.t===3).length,
+{id:"leg",name:"Legendäre Länder",cat:"Erleben",ic:"💎",d:n=>n+" Länder der Stufe legendär",f:()=>visited().filter(x=>x.t===3).length,
  tiers:[{n:1,t:"Legendär",fl:"Legendenjäger:in"},{n:10,t:"Legendensammler",fl:"Legendensammler:in"}]},
-{id:"stern",cat:"Erleben",ic:"⭐",d:()=>"Ein Land mit 5 Sternen bewertet",f:()=>visited().filter(x=>(rec(x.c).rating||0)===5).length,
+{id:"stern",name:"Bestnote",cat:"Erleben",ic:"⭐",d:()=>"Ein Land mit 5 Sternen bewertet",f:()=>visited().filter(x=>(rec(x.c).rating||0)===5).length,
  tiers:[{n:1,t:"Bestnote"}]}
 ];
 
@@ -721,6 +743,8 @@ function renderPass(){
 
 function renderDex(){
   const g=document.getElementById("grid"),cf=document.getElementById("contFilters");
+  g.className="grid"+(state.view==="liste"?" liste":"");
+  const vt=document.getElementById("viewToggle"); if(vt)vt.textContent=state.view==="liste"?"Kacheln":"Liste";
   if(!cf.dataset.done){
     cf.innerHTML='<button class="chip" data-k="" aria-pressed="true">Weltweit</button>'+
       KONT.map(k=>`<button class="chip" data-k="${k}" aria-pressed="false">${k}</button>`).join("");
@@ -777,9 +801,9 @@ function renderAch(){
     fh.dataset.done=1;
   }
   const alle=achs(), erh=alle.filter(z=>z.ok).length;
-  let g=gruppen().filter(x=>{
+  const g=gruppen().filter(x=>{
     if(aKat&&x.def.cat!==aKat)return false;
-    if(aFilter==="done")return x.fertig;
+    if(aFilter==="done")return x.erreicht>0;
     if(aFilter==="open")return !x.fertig;
     if(aFilter==="near")return !x.fertig&&x.naechst&&x.naechst.need>0&&x.naechst.cur/x.naechst.need>=.5;
     return true;
@@ -788,16 +812,17 @@ function renderAch(){
   if(!g.length){document.getElementById("achList").innerHTML=kopf+'<div class="empty">Hier ist gerade nichts.</div>';return;}
   document.getElementById("achList").innerHTML=kopf+g.map(x=>{
     const hoch=x.slots.filter(z=>z.ok).pop();
-    const titel=hoch?hoch.t:x.slots[0].t;
     const pips=x.slots.map(z=>`<span class="pip${z.ok?" on":""}"></span>`).join("");
-    const stand=x.fertig
-      ? "Alle Stufen erhalten"+(hoch&&hoch.fl?" · Flair „"+hoch.fl+"“":"")
-      : (GUEST?"Noch offen":x.naechst.cur+" / "+x.naechst.need+" → "+x.naechst.t);
-    return `<button class="ach${x.fertig?"":" locked"}" data-grp="${x.def.id}">
+    let zeile;
+    if(x.fertig) zeile="Alle "+x.slots.length+" Stufen erhalten"+(hoch.fl?" · Flair „"+hoch.fl+"“":"");
+    else if(GUEST) zeile=hoch?"Erreicht: "+hoch.t:"Noch offen";
+    else if(hoch) zeile="Erreicht: "+hoch.t+" · weiter zu "+x.naechst.t+" ("+x.naechst.cur+"/"+x.naechst.need+")";
+    else zeile=x.naechst.cur+" / "+x.naechst.need+" → "+x.naechst.t;
+    return `<button class="ach${x.erreicht?"":" locked"}" data-grp="${x.def.id}">
       <div class="ic">${x.def.ic}</div>
-      <div style="flex:1;min-width:0"><div class="t">${titel}</div>
+      <div style="flex:1;min-width:0"><div class="t">${x.def.name}</div>
         <div class="d">${x.fertig?x.slots[x.slots.length-1].d:x.naechst.d}</div>
-        <div class="pg">${stand}</div>
+        <div class="pg">${zeile}</div>
         ${x.slots.length>1?`<div class="pips">${pips}</div>`:""}</div>
       <div class="chev">›</div></button>`;
   }).join("");
@@ -822,7 +847,7 @@ function openAchSheet(id){
   }
   document.getElementById("sheetHost").innerHTML=`<div class="sheet" id="sheet"><div class="page">
     <div class="page-hd"><div class="flag">${def.ic}</div>
-      <div><h2>${x.slots[x.slots.length-1].t}</h2><div class="meta">${def.cat} · ${x.erreicht}/${x.slots.length} Stufen</div></div>
+      <div><h2>${def.name}</h2><div class="meta">${def.cat} · ${x.erreicht}/${x.slots.length} Stufen</div></div>
       <button class="close" data-act="close" aria-label="Schließen">✕</button></div>
     ${def.info?`<div class="sec"><h3>Worum es geht</h3><p style="font-size:13.5px;margin:0;line-height:1.5">${def.info}</p></div>`:""}
     <div class="sec"><h3>Stufen</h3>${stufen}</div>
@@ -863,6 +888,14 @@ function renderProf(){
       <p class="note" style="margin-top:9px">Gesperrte Flairs schaltest du über den jeweiligen Orden frei.</p>
     </div>
     <div class="panel">
+      <h3>Schriftgröße</h3>
+      <div class="flairs">
+        ${[["1","Normal"],["1.15","Groß"],["1.3","Sehr groß"]].map(o=>
+          `<button data-fs="${o[0]}" class="${String(state.fs||1)===o[0]?"on":""}">${o[1]}</button>`).join("")}
+      </div>
+      <p class="note" style="margin-top:9px">Wirkt auf die ganze App.</p>
+    </div>
+    <div class="panel">
       <h3>Passfoto</h3>
       <div class="rowbtns" style="margin:0">
         <button class="smallbtn" id="setPhoto">Foto wählen</button>
@@ -882,6 +915,37 @@ function renderData(){
 function render(){
   renderPass();
   ({dex:renderDex,book:renderBook,ach:renderAch,prof:renderProf,data:renderData})[tab]();
+}
+
+/* ====== Ordensmeldung ====== */
+function ordenStand(){return new Set(achs().filter(a=>a.ok).map(a=>a.key));}
+function ordenPruefen(vor){
+  const neu=achs().filter(a=>a.ok&&!vor.has(a.key));
+  if(neu.length)zeigeOrden(neu);
+}
+let ordenQueue=[];
+function zeigeOrden(liste){
+  ordenQueue=ordenQueue.concat(liste);
+  if(!document.getElementById("ordenPop"))naechsterOrden();
+}
+function naechsterOrden(){
+  const o=ordenQueue.shift();
+  const alt=document.getElementById("ordenPop"); if(alt)alt.remove();
+  if(!o)return;
+  const d=document.createElement("div");
+  d.id="ordenPop"; d.className="ordenpop";
+  d.innerHTML=`<div class="ordenkarte">
+    <div class="oben">Orden erhalten</div>
+    <div class="ic">${o.ic}</div>
+    <div class="tt">${o.t}</div>
+    <div class="dd">${o.d}</div>
+    ${o.fl?`<div class="fl">Flair freigeschaltet · ${o.fl}</div>`:""}
+    ${ordenQueue.length?`<div class="rest">noch ${ordenQueue.length} weitere</div>`:""}
+  </div>`;
+  document.body.appendChild(d);
+  const weg=()=>{d.remove();clearTimeout(t);naechsterOrden();};
+  d.addEventListener("click",weg);
+  const t=setTimeout(weg,3600);
 }
 
 /* ====== Länderseite ====== */
@@ -999,6 +1063,7 @@ function bindSheet(){
     if(e.target===sh){closeSheet();return;}
     const b=e.target.closest("button"); if(!b)return;
     const r=ensure(openCode);
+    const vorOrden=ordenStand(); setTimeout(()=>ordenPruefen(vorOrden),0);
     if(b.dataset.act==="close"){closeSheet();return;}
     if(b.dataset.act==="delcountry"){
       if(!confirm("„"+byCode(openCode).n+"“ mit allen Einträgen löschen?"))return;
@@ -1026,6 +1091,7 @@ function bindSheet(){
       return;}
   });
   const onEdit=e=>{
+    const vorOrden=ordenStand(); setTimeout(()=>ordenPruefen(vorOrden),0);
     const ck=e.target.dataset.c;
     if(ck){const obj=(state.custom||[]).find(z=>z.c===openCode);if(!obj)return;
       obj[ck]=ck==="t"?+e.target.value:(e.target.value.trim()||(ck==="f"?"🏳️":obj[ck]));save();return;}
@@ -1055,10 +1121,13 @@ document.getElementById("achKat").addEventListener("click",e=>{
 document.getElementById("profBody").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b)return;
   if(b.dataset.flair!==undefined){state.flair=b.dataset.flair;save();renderProf();renderPass();return;}
+  if(b.dataset.fs){state.fs=+b.dataset.fs;save();schrift();renderProf();return;}
   if(b.id==="setPhoto"){pickPhotos(false,420,.7,u=>{state.photo=u[0];save();renderProf();renderPass();});return;}
   if(b.id==="delPhoto"){state.photo="";save();renderProf();renderPass();return;}
 });
 document.getElementById("passPhoto").addEventListener("click",()=>GUEST||pickPhotos(false,420,.7,u=>{state.photo=u[0];save();renderPass();}));
+document.getElementById("viewToggle").addEventListener("click",()=>{
+  state.view=state.view==="liste"?"kachel":"liste"; save(); renderDex();});
 document.getElementById("search").addEventListener("input",e=>{q=e.target.value.trim().toLowerCase();renderDex();});
 document.querySelectorAll('.filters [data-f]').forEach(b=>b.addEventListener("click",()=>{
   filter=b.dataset.f;document.querySelectorAll('.filters [data-f]').forEach(z=>z.setAttribute("aria-pressed",z===b));renderDex();}));
@@ -1102,6 +1171,12 @@ document.addEventListener("keydown",e=>{
   if(document.getElementById("sheet")){document.getElementById("sheetHost").innerHTML="";document.body.style.overflow="";}
 });
 
+function schrift(){
+  const f=+state.fs||1;
+  document.body.style.zoom=f===1?"":f;
+  if(document.body.style.zoom==="") document.body.style.fontSize=f===1?"":(f*100)+"%";
+}
+
 /* ====== Start ====== */
 if("serviceWorker" in navigator && location.protocol==="https:")
   window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
@@ -1129,6 +1204,7 @@ if(m){
   }
 }
 document.getElementById("nameIn").value=state.name||"";
+schrift();
 if(!GUEST) render();
 </script>
 </body>
